@@ -138,24 +138,36 @@ pnpm build
 
 Build specific package:
 
+````bash
+pnpm -C server build
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Building</span>
+
+Build all packages:
+
+```bash
+pnpm build
+````
+
+Build specific package:
+
 ```bash
 pnpm -C server build
 pnpm -C client build
 ```
 
-## API Documentation
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">API Documentation</span>
 
-### Health Check
+### <span style="color: #B0E0E6; text-shadow: 0 0 8px #B0E0E6;">Health Check</span>
 
 Check server health and database connectivity.
 
-**Request**
+**<span style="color: #90EE90;">Request</span>**
 
 ```
 GET /api/health
 ```
 
-**Response**
+**<span style="color: #90EE90;">Response</span>**
 
 ```json
 {
@@ -164,43 +176,43 @@ GET /api/health
 }
 ```
 
-**Status Codes**
+**<span style="color: #90EE90;">Status Codes</span>**
 
 - `200` - Server and database healthy
 - `503` - Database unavailable
 
-## Testing with Postman
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Testing with Postman</span>
 
-A Postman collection is included for testing API endpoints.
+A <span style="color: #90EE90;">Postman</span> collection is included for testing API endpoints.
 
-**Import Collection**
+**<span style="color: #B0E0E6; text-shadow: 0 0 8px #B0E0E6;">Import Collection</span>**
 
-1. Open Postman
+1. Open <span style="color: #90EE90;">Postman</span>
 2. Click Import button
 3. Select `TempoMode.postman_collection.json`
 4. Create/select environment variable: `base_url=http://localhost:4000`
 
-## Project Architecture
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Project Architecture</span>
 
-### Backend Architecture
+### <span style="color: #B0E0E6; text-shadow: 0 0 8px #B0E0E6;">Backend Architecture</span>
 
-**Controllers** - Handle HTTP requests and responses
-**Services** - Contain business logic and data operations
-**Middlewares** - Process requests and responses (logging, error handling)
-**Routes** - Define API endpoints and map to controllers
-**Database** - PostgreSQL connection pool and queries
-**Utils** - Logger and shared utilities
+**<span style="color: #90EE90;">Controllers</span>** - Handle HTTP requests and responses
+**<span style="color: #90EE90;">Services</span>** - Contain business logic and data operations
+**<span style="color: #90EE90;">Middlewares</span>** - Process requests and responses (logging, error handling)
+**<span style="color: #90EE90;">Routes</span>** - Define API endpoints and map to controllers
+**<span style="color: #90EE90;">Database</span>** - PostgreSQL connection pool and queries
+**<span style="color: #90EE90;">Utils</span>** - Logger and shared utilities
 
-### Frontend Architecture
+### <span style="color: #B0E0E6; text-shadow: 0 0 8px #B0E0E6;">Frontend Architecture</span>
 
-**Components** - Reusable UI components (shadcn/ui based)
-**Pages** - Page-level components
-**Utils** - Helper functions and constants
-**Hooks** - Custom React hooks
+**<span style="color: #90EE90;">Components</span>** - Reusable UI components (shadcn/ui based)
+**<span style="color: #90EE90;">Pages</span>** - Page-level components
+**<span style="color: #90EE90;">Utils</span>** - Helper functions and constants
+**<span style="color: #90EE90;">Hooks</span>** - Custom React hooks
 
-## Logging
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Logging</span>
 
-Backend uses Pino for structured logging with automatic request logging. Each request logs:
+Backend uses <span style="color: #90EE90;">Pino</span> for structured logging with automatic request logging. Each request logs:
 
 - HTTP method
 - Request URL
@@ -213,43 +225,43 @@ Example log:
 [INFO] GET /api/health 200 1.23ms
 ```
 
-## Database
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Database</span>
 
-PostgreSQL connection is managed through a connection pool in `server/src/db/pool.ts`.
+<span style="color: #90EE90;">PostgreSQL</span> connection is managed through a connection pool in `server/src/db/pool.ts`.
 
 Configure database connection via `DATABASE_URL` environment variable.
 
-## Contributing
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Contributing</span>
 
 1. Create feature branch: `git checkout -b feature/your-feature`
 2. Make changes and commit: `git commit -am 'Add feature'`
 3. Push to branch: `git push origin feature/your-feature`
 4. Submit pull request
 
-## Scripts
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Scripts</span>
 
-### Root Level
+### <span style="color: #B0E0E6; text-shadow: 0 0 8px #B0E0E6;">Root Level</span>
 
 - `pnpm dev` - Start all apps in development mode
 - `pnpm build` - Build all packages
 - `pnpm lint` - Run linters across workspaces
 
-### Server
+### <span style="color: #B0E0E6; text-shadow: 0 0 8px #B0E0E6;">Server</span>
 
 - `pnpm -C server dev` - Start server with nodemon
 - `pnpm -C server build` - Build TypeScript to dist/
 - `pnpm -C server start` - Run compiled server
 
-### Client
+### <span style="color: #B0E0E6; text-shadow: 0 0 8px #B0E0E6;">Client</span>
 
 - `pnpm -C client dev` - Start Vite dev server
 - `pnpm -C client build` - Build for production
 - `pnpm -C client preview` - Preview production build
 
-## License
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">License</span>
 
-MIT
+<span style="color: #90EE90;">MIT</span>
 
-## Support
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Support</span>
 
 For issues, questions, or contributions, please open an issue or contact the development team.
