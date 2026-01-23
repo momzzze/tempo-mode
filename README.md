@@ -1,20 +1,14 @@
-<div align="center">
-  <img src="assets/tempo-mode-logo.png" alt="TempoMode Logo" width="200"/>
+<div align="center"> 
   
-  # TempoMode
+  # <img src="assets/tempo-mode-logo.png" alt="TempoMode Logo" width="200"/>
   
-  <img src="assets/logo-tempo-mode.png" alt="TempoMode Text" width="400"/>
 </div>
 
 <p align="center">
   A modern monorepo for time-based application management with a Node.js/Express backend and React frontend.
 </p>
 
-<div align="center">
-  <img src="assets/tempo-mode-icon.png" alt="TempoMode Icon" width="100"/>
-</div>
-
-## Tech Stack
+    ## Tech Stack
 
 **Backend**
 
