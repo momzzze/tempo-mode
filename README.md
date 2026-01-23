@@ -1,9 +1,9 @@
 <div align="center">
-  <img src="assets/tempo-logo.png" alt="TempoMode Logo" width="200"/>
+  <img src="assets/tempo-mode-logo.png" alt="TempoMode Logo" width="200"/>
   
   # TempoMode
   
-  <img src="assets/tempo-text.png" alt="TempoMode Text" width="400"/>
+  <img src="assets/logo-tempo-mode.png" alt="TempoMode Text" width="400"/>
 </div>
 
 <p align="center">
@@ -11,7 +11,7 @@
 </p>
 
 <div align="center">
-  <img src="assets/tempo-icon.png" alt="TempoMode Icon" width="100"/>
+  <img src="assets/tempo-mode-icon.png" alt="TempoMode Icon" width="100"/>
 </div>
 
 ## Tech Stack
