@@ -30,7 +30,7 @@
 
 - <span style="color: #90EE90;">pnpm</span> workspaces for package management
 
-## Project Structure
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Project Structure</span>
 
 ```
 tempo-mode/
@@ -61,19 +61,19 @@ tempo-mode/
 └── TempoMode.postman_collection.json
 ```
 
-## Prerequisites
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Prerequisites</span>
 
-- Node.js 18 or higher
-- pnpm 9.x or higher
-- PostgreSQL 12+ (optional for local development)
+- <span style="color: #90EE90;">Node.js</span> 18 or higher
+- <span style="color: #90EE90;">pnpm</span> 9.x or higher
+- <span style="color: #90EE90;">PostgreSQL</span> 12+ (optional for local development)
 
-Install pnpm globally:
+Install <span style="color: #90EE90;">pnpm</span> globally:
 
 ```bash
 npm install -g pnpm
 ```
 
-## Installation
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Installation</span>
 
 Clone the repository and install dependencies:
 
@@ -83,9 +83,9 @@ cd tempo-mode
 pnpm install
 ```
 
-## Configuration
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Configuration</span>
 
-### Server Environment Setup
+### <span style="color: #B0E0E6; text-shadow: 0 0 8px #B0E0E6;">Server Environment Setup</span>
 
 Create a `.env` file in the `server/` directory:
 
@@ -97,9 +97,9 @@ JWT_SECRET=your-secret-key-here
 
 See `server/.env.example` for reference.
 
-## Development
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Development</span>
 
-### Start Development Servers
+### <span style="color: #B0E0E6; text-shadow: 0 0 8px #B0E0E6;">Start Development Servers</span>
 
 Run both frontend and backend in development mode:
 
@@ -109,10 +109,10 @@ pnpm dev
 
 This will:
 
-- Start the React development server on `http://localhost:5173`
-- Start the Express server on `http://localhost:4000`
+- Start the <span style="color: #90EE90;">React</span> development server on `http://localhost:5173`
+- Start the <span style="color: #90EE90;">Express</span> server on `http://localhost:4000`
 
-### Individual Development
+### <span style="color: #B0E0E6; text-shadow: 0 0 8px #B0E0E6;">Individual Development</span>
 
 Start only the backend:
 
@@ -128,7 +128,7 @@ cd client
 pnpm dev
 ```
 
-## Building
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Building</span>
 
 Build all packages:
 
