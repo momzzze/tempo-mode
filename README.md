@@ -1,33 +1,34 @@
-<div align="center"> 
+<div align="center">
+  <img src="assets/tempo-mode-logo.png" alt="TempoMode Logo" width="200"/>
   
-  # <img src="assets/tempo-mode-logo.png" alt="TempoMode Logo" width="200"/>
+  # <span style="color: #00FF00; text-shadow: 0 0 15px #00FF00, 0 0 30px #00FF00;">TempoMode</span>
   
 </div>
 
 <p align="center">
-  A modern monorepo for time-based application management with a Node.js/Express backend and React frontend.
+  <span style="color: #B0E0E6;">A modern monorepo for time-based application management with a Node.js/Express backend and React frontend.</span>
 </p>
 
-    ## Tech Stack
+## <span style="color: #00FF00; text-shadow: 0 0 10px #00FF00;">Tech Stack</span>
 
-**Backend**
+**<span style="color: #B0E0E6;">Backend</span>**
 
-- Node.js 18+ with TypeScript (ESM)
-- Express.js for REST API
-- PostgreSQL for data persistence
-- Pino for structured logging
-- Nodemon for development
+- <span style="color: #90EE90;">Node.js</span> 18+ with <span style="color: #90EE90;">TypeScript</span> (ESM)
+- <span style="color: #90EE90;">Express.js</span> for REST API
+- <span style="color: #90EE90;">PostgreSQL</span> for data persistence
+- <span style="color: #90EE90;">Pino</span> for structured logging
+- <span style="color: #90EE90;">Nodemon</span> for development
 
-**Frontend**
+**<span style="color: #B0E0E6;">Frontend</span>**
 
-- React 19 with TypeScript
-- Vite as build tool
-- Tailwind CSS for styling
-- shadcn/ui for component library
+- <span style="color: #90EE90;">React</span> 19 with <span style="color: #90EE90;">TypeScript</span>
+- <span style="color: #90EE90;">Vite</span> as build tool
+- <span style="color: #90EE90;">Tailwind CSS</span> for styling
+- <span style="color: #90EE90;">shadcn/ui</span> for component library
 
-**Monorepo**
+**<span style="color: #B0E0E6;">Monorepo</span>**
 
-- pnpm workspaces for package management
+- <span style="color: #90EE90;">pnpm</span> workspaces for package management
 
 ## Project Structure
 
