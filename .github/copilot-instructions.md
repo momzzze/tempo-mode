@@ -1,0 +1,266 @@
+# Copilot Instructions — TempoMode Monorepo
+
+This repository is a pnpm-workspace monorepo with two apps:
+
+- `server/` (Node.js + Express + TypeScript, ESM)
+- `client/` (Vite + React + TypeScript + Tailwind + shadcn/ui)
+
+Follow these instructions exactly. Do not invent alternative structures.
+
+---
+
+## ✅ Checklist
+
+- [x] Verify that the copilot-instructions.md file in the .github directory is created.
+- [x] Clarify Project Requirements
+- [x] Scaffold the Project
+- [x] Customize the Project
+- [x] Install Required Extensions
+- [ ] Compile the Project
+- [ ] Create and Run Task
+- [ ] Launch the Project
+- [ ] Ensure Documentation is Complete
+
+---
+
+## 1) Clarify Project Requirements
+
+Project requirements are already specified. Do NOT ask follow-up questions unless absolutely required.
+
+**✅ COMPLETED**: Monorepo, server, and client requirements confirmed and aligned.
+
+Monorepo requirements:
+
+- Use `pnpm` workspaces
+- Root has `package.json` + `pnpm-workspace.yaml`
+- Apps live in `client/` and `server/`
+
+Server requirements:
+
+- Express + TypeScript
+- `type: "module"` (ESM), not CommonJS
+- Has `src/` folder
+- Architecture: `controllers/ services/ routes/ middlewares/ utils/`
+- Postgres (use `pg`)
+- Logger: `pino` with `pino-pretty` in `utils`
+- Request logging middleware: ONE line output per request (method + url + status + response time). No fancy multi-line logs.
+
+Client requirements:
+
+- Vite + React + TypeScript
+- Tailwind CSS + shadcn/ui
+
+Mark this checklist item complete once aligned.
+
+---
+
+## 2) Scaffold the Project
+
+### Root (pnpm workspace)
+
+Create:
+
+- `package.json` (private, workspaces scripts)
+- `pnpm-workspace.yaml` with:
+  - `packages: ["client", "server"]`
+
+Root scripts:
+
+- `pnpm -r dev` should run both apps in dev
+- `pnpm -r build` should build both
+- `pnpm -r lint` if lint exists
+
+### Server scaffold
+
+Location: `./server`
+
+Must contain:
+
+- `package.json` with:
+  - `"type": "module"`
+  - scripts: `dev`, `build`, `start`
+- `tsconfig.json` configured for ESM NodeNext
+- `src/` folder with:
+  - `src/index.ts` (bootstrap)
+  - `src/app.ts` (express app)
+  - `src/routes/`
+  - `src/controllers/`
+  - `src/services/`
+  - `src/middlewares/`
+  - `src/utils/`
+  - `src/db/` (Postgres pool + helpers)
+
+### Client scaffold
+
+Location: `./client`
+
+Must be created using Vite (React + TS).
+Then add Tailwind and shadcn/ui.
+
+Do not create extra top-level folders besides `client/`, `server/`, and optional `.vscode/`.
+
+**✅ COMPLETED**:
+
+- Root `package.json` with workspace scripts (`pnpm -r dev`, `pnpm -r build`, `pnpm -r lint`)
+- `pnpm-workspace.yaml` configured
+- Server scaffold complete with all required folders and files
+- Client folder exists (Vite scaffolded)
+- No extra top-level folders created
+
+---
+
+## 3) Customize the Project (Server Rules)
+
+### Server conventions
+
+- Use ESM imports everywhere (no `require`)
+- Prefer explicit file boundaries:
+  - `controllers` only handle req/res and validation orchestration
+  - `services` contain business logic
+  - `db` contains pool and DB queries
+  - `routes` only map routes → controller functions
+  - `middlewares` only middleware
+  - `utils` only shared helpers (including logger)
+
+### Logger (required)
+
+Create `src/utils/logger.ts` exporting a configured `pino` instance.
+Use `pino-pretty` for dev output (transport).
+Do not create multiple logger instances.
+
+### Request logging middleware (required)
+
+Create `src/middlewares/requestLogger.ts`:
+
+- Must log one line per request.
+- Format should include: METHOD URL STATUS DURATION_MS
+- Do not log headers or bodies by default.
+
+### Postgres (required)
+
+Use `pg` with a pooled connection in `src/db/pool.ts`.
+Read connection string from env:
+
+- `DATABASE_URL`
+
+Provide a simple `health` route that checks DB connectivity.
+
+### Environment
+
+Use `.env` for local dev (do not commit secrets).
+Server should read:
+
+- `PORT`
+- `DATABASE_URL`
+- `JWT_SECRET` (if auth is added later)
+
+### Error handling
+
+- Provide a centralized error middleware: `src/middlewares/errorHandler.ts`
+- Keep responses consistent JSON:
+  - `{ error: { message, code? } }`
+
+**✅ COMPLETED**:
+
+- Express app with middleware chain in `src/index.ts`
+- Logger (`pino` + `pino-pretty`) in `src/utils/logger.ts`
+- Request logging middleware in `src/middlewares/requestLogger.ts` (one-line format: METHOD URL STATUS DURATION_MS)
+- Error handler middleware in `src/middlewares/errorHandler.ts`
+- Postgres pool in `src/db/pool.ts` with `.env` configuration
+- Health service and controller with DB connectivity check
+- Health route at `GET /api/health`
+- `.env` file configured with PORT=4000 and DATABASE_URL
+
+---
+
+## 4) Customize the Project (Client Rules)
+
+### Client conventions
+
+- Use React + TypeScript.
+- Use Tailwind and shadcn/ui components.
+- Keep UI components reusable.
+- Do not hardcode backend URLs; use `VITE_API_URL`.
+
+**Status**: Vite + React + TypeScript scaffold created. Tailwind + shadcn/ui setup pending.
+
+---
+
+## 5) Install Required Extensions
+
+Do not install extensions unless explicitly required by the environment setup tool.
+If none are required, mark this step complete.
+
+**✅ COMPLETED**: No extensions required for current setup.
+
+---
+
+## 6) Compile the Project
+
+- Install deps with `pnpm install` at repo root.
+- Ensure:
+  - `pnpm -C server build` succeeds
+  - `pnpm -C client build` succeeds
+- Fix any TypeScript/ESM issues properly (do not switch to CommonJS).
+  Mark this checklist item complete after successful builds.
+
+---
+
+## 7) Create and Run Task (VS Code)
+
+Only create `.vscode/tasks.json` if necessary.
+If created, tasks should run:
+
+- `pnpm -r dev`
+
+Mark complete if tasks are not required.
+
+---
+
+## 8) Launch the Project
+
+Do not launch unless user confirms.
+If launching, use:
+
+- `pnpm -r dev`
+  Client and server should run concurrently.
+
+---
+
+## 9) Ensure Documentation is Complete
+
+- Ensure `README.md` exists and reflects:
+  - pnpm workspace usage
+  - how to run dev/build
+  - env vars required
+- Ensure this file exists: `.github/copilot-instructions.md`
+- Remove all HTML comments from documentation files if present.
+
+Mark this checklist item complete when docs are consistent and current.
+
+---
+
+## Development Rules (Strict)
+
+- Use current directory `.` as the project root.
+- Do not add unrelated libraries.
+- Do not add Docker, CI, or deployment unless explicitly requested.
+- Avoid verbose explanations; keep changes precise and minimal.
+- Keep folder structure exactly as specified.
+- Prefer small, composable functions.
+- Never introduce CommonJS in the server.
+
+## 10) Postman Collection
+
+A Postman collection is available for testing the API: `TempoMode.postman_collection.json`
+
+To import:
+
+1. Open Postman
+2. Click **Import**
+3. Select the `TempoMode.postman_collection.json` file
+4. Set environment variable: `base_url=http://localhost:4000`
+
+Current endpoints:
+
+- `GET /api/health` - Server health & DB connectivity check

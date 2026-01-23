@@ -1,0 +1,12 @@
+{
+    "exec": "tsx src/index.ts",
+    "ext": "ts",
+    "ignore": [
+        "dist",
+        "node_modules"
+    ],
+    "nodeArgs": [
+        "--no-warnings"
+    ],
+    "inspect": false
+}
