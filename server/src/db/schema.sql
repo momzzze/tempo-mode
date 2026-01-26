@@ -43,3 +43,8 @@ CREATE TABLE IF NOT EXISTS usage_limits (
   cycles_used INTEGER DEFAULT 0,
   PRIMARY KEY (user_id, date)
 );
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_usage_limits_lookup ON usage_limits(user_id, date);

@@ -32,9 +32,12 @@ Central tracker for small, verifiable tasks (Ralph Wiggum method). Use GitHub Is
 
 ### Task 1.4: Test DB Connection (Issue)
 
-- [ ] Verify startup logs with configured `DATABASE_URL`
-  - `.env` example: `DATABASE_URL=postgres://user:pass@localhost:5432/tempmode`
+- [x] Verify startup logs with configured `DATABASE_URL`
+  - `.env` example: `DATABASE_URL=postgres://user:pass@localhost:5432/tempo_mode`
   - If using hosted PG with SSL, add `?sslmode=require`
+  - **Fixed**: UTF-8 BOM issue in schema.sql
+  - **Fixed**: dotenv loading order (moved `import 'dotenv/config'` to pool.ts)
+  - **Result**: Server logs "Database connected" on port 8080
 
 ---
 
@@ -44,12 +47,14 @@ Central tracker for small, verifiable tasks (Ralph Wiggum method). Use GitHub Is
 
 - [x] Add schema SQL at `server/src/db/schema.sql`
 - [x] Migration runner `server/src/db/migrate.ts`
-- [ ] Run migration against dev DB
+- [x] Run migration against dev DB
   - Ensure `pgcrypto` extension exists (for `gen_random_uuid()`)
   - Idempotency: `CREATE TABLE IF NOT EXISTS`
   - Indexes:
-    - [ ] `CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`
-    - [ ] `CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id)`
+    - [x] `CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`
+    - [x] `CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id)`
+    - [x] `CREATE INDEX IF NOT EXISTS idx_usage_limits_lookup ON usage_limits(user_id, date)`
+  - **Completed**: Migration ran successfully via `pnpm run db:migrate`
   - Future seeds: system modes/presets/audio sources
 
 ---
@@ -73,13 +78,19 @@ Central tracker for small, verifiable tasks (Ralph Wiggum method). Use GitHub Is
 
 - [x] `server/src/db/models/User.ts` (queries: find/create/exists)
 - [x] `server/src/services/authService.ts` (bcrypt + JWT)
-- [ ] Configure `JWT_SECRET` in `.env`
+- [x] Configure `JWT_SECRET` in `.env`
 - [ ] Test register/login via Postman
 - Details:
   - Hashing: `bcrypt` with `SALT_ROUNDS = 10`
   - JWT claims: `sub`, `email`, `plan`; expiry: `7d`
   - Errors: `409` (duplicate email), `401` (invalid creds), `500` if `JWT_SECRET` missing
   - Do not expose `password_hash` in responses (`toSafe()`)
+  - **Implementation Notes**:
+    - User model: `findByEmail()`, `create()`, `existsByEmail()`, `toSafe()`
+    - Auth service: `registerUser()`, `loginUser()`
+    - Auth controller: `register()`, `login()` with validation
+    - Routes mounted at `/api/auth/register` and `/api/auth/login`
+    - Fixed duplicate bcrypt import and TypeScript strictNullChecks
 
 ---
 

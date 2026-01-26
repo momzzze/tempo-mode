@@ -22,7 +22,7 @@ export class User {
 
   static async existsByEmail(email: string): Promise<boolean> {
     const res = await query('SELECT 1 FROM users WHERE email = $1', [email]);
-    return res.rowCount > 0;
+    return (res.rowCount ?? 0) > 0;
   }
 
   static async create(email: string, passwordHash: string): Promise<User> {

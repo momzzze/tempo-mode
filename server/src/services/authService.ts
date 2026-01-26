@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../db/models/User.js';
 
@@ -26,21 +25,17 @@ export async function loginUser(email: string, password: string) {
   }
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    throw Object.assign(new Error('Server misconfigured: JWT_SECRET missing'), { status: 500 });
+    throw Object.assign(new Error('Server misconfigured: JWT_SECRET missing'), {
+      status: 500,
+    });
   }
   const safe = user.toSafe();
-  const token = jwt.sign({ sub: safe.id, email: safe.email, plan: safe.plan }, secret, {
-    expiresIn: '7d'
-  });
-  return { token, user: safe };
-}
   const token = jwt.sign(
-    { sub: user.id, email: user.email, plan: user.plan },
+    { sub: safe.id, email: safe.email, plan: safe.plan },
     secret,
     {
       expiresIn: '7d',
     }
   );
-  const { password_hash, ...safeUser } = user;
-  return { token, user: safeUser };
+  return { token, user: safe };
 }
