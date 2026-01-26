@@ -22,3 +22,8 @@
   height: 1px;
   background: var(--border-outer);
 }
+
+:root[data-layer='fog'] .divider::before,
+:root[data-layer='fog'] .divider::after {
+  background: color-mix(in srgb, var(--border-outer) 75%, transparent);
+}

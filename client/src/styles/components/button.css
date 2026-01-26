@@ -2,8 +2,9 @@
   background: transparent;
   border: 1px solid var(--border-outer);
   color: var(--gray-400);
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-1) var(--space-3);
   font-family: inherit;
+  font-size: var(--font-size-sm);
   letter-spacing: var(--letter-ui);
   cursor: pointer;
   transition: all 0.15s ease-out;
@@ -42,4 +43,20 @@
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Icon button variant */
+.btn--icon {
+  padding: var(--space-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+/* Fog/transparent treatment */
+:root[data-layer='fog'] .btn {
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+  backdrop-filter: blur(8px) saturate(115%);
 }

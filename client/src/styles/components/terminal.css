@@ -34,6 +34,13 @@
   color: var(--status-bad);
 }
 
+/* Fog/transparent treatment */
+:root[data-layer='fog'] .terminal {
+  background: color-mix(in srgb, var(--surface-1) 60%, transparent);
+  backdrop-filter: blur(10px) saturate(115%);
+  border: 1px solid color-mix(in srgb, var(--border-outer) 70%, transparent);
+}
+
 /* Scrollbar styling */
 .terminal::-webkit-scrollbar {
   width: 6px;

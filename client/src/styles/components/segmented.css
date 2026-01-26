@@ -33,3 +33,9 @@
   box-shadow: inset 0 -2px 0 var(--neon-400);
   background: rgba(51, 255, 136, 0.05);
 }
+
+/* Fog/transparent treatment */
+:root[data-layer='fog'] .segmented {
+  background: color-mix(in srgb, var(--surface-2) 62%, transparent);
+  backdrop-filter: blur(8px) saturate(115%);
+}

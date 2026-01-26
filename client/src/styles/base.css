@@ -5,16 +5,22 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: var(--color-scheme);
 }
 
 body {
   margin: 0;
   font-family: var(--font-ui);
-  background: radial-gradient(circle at top, #121714, var(--gray-950));
-  color: var(--gray-400);
+  background: var(--bg-body);
+  color: var(--text-1);
   font-size: var(--font-size-md);
   line-height: var(--line-normal);
+}
+
+/* Fog mode backdrop support */
+:root[data-layer='fog'] body {
+  background: color-mix(in srgb, var(--bg-body) 75%, transparent);
+  backdrop-filter: blur(6px) saturate(110%);
 }
 
 /* Link styling */

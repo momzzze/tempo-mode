@@ -1,0 +1,31 @@
+/* Auth page styles */
+.auth-page {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-8);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+}
+
+.form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.form label {
+  display: block;
+  color: var(--gray-300);
+}
+
+.form input[type='email'],
+.form input[type='password'] {
+  width: 100%;
+}
+
+.form .actions {
+  margin-top: var(--space-4);
+}

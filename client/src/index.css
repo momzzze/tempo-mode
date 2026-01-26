@@ -10,6 +10,7 @@
 @import './styles/pages/pomodoro.css';
 @import './styles/pages/settings.css';
 @import './styles/pages/stats.css';
+@import './styles/pages/auth.css';
 
 /* Accessibility: Respect motion preferences */
 @media (prefers-reduced-motion: reduce) {

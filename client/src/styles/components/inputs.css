@@ -58,3 +58,14 @@ input[type='radio'] {
   cursor: pointer;
   accent-color: var(--neon-400);
 }
+
+/* Fog/transparent treatment */
+:root[data-layer='fog'] input[type='text'],
+:root[data-layer='fog'] input[type='email'],
+:root[data-layer='fog'] input[type='password'],
+:root[data-layer='fog'] input[type='number'],
+:root[data-layer='fog'] textarea,
+:root[data-layer='fog'] select {
+  background: color-mix(in srgb, var(--surface-2) 62%, transparent);
+  backdrop-filter: blur(8px) saturate(115%);
+}

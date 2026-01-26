@@ -16,6 +16,23 @@
   border-radius: var(--radius-md);
 }
 
+/* Fog/transparent treatment */
+:root[data-layer='fog'] .card {
+  background: color-mix(in srgb, var(--surface-1) 40%, transparent);
+  backdrop-filter: blur(8px) saturate(112%);
+}
+
+/* Minimal overlay variant for fog layer (no frame/shadow) */
+:root[data-layer='fog'] .card.card--overlay {
+  background: color-mix(in srgb, var(--surface-1) 26%, transparent);
+  border: none;
+  box-shadow: none;
+}
+
+:root[data-layer='fog'] .card.card--overlay::after {
+  display: none;
+}
+
 .card--secondary {
   background: var(--surface-2);
 }
