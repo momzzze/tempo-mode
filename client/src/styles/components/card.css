@@ -1,0 +1,53 @@
+.card {
+  background: var(--surface-1);
+  border: var(--border-hairline) solid var(--border-outer);
+  box-shadow: var(--shadow-panel);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  position: relative;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  pointer-events: none;
+  border-radius: var(--radius-md);
+}
+
+.card--secondary {
+  background: var(--surface-2);
+}
+
+.card--tertiary {
+  background: var(--surface-3);
+}
+
+/* Card sections */
+.card__header {
+  margin-bottom: var(--space-4);
+}
+
+.card__header h2,
+.card__header h3 {
+  font-size: var(--font-size-lg);
+  color: var(--gray-300);
+}
+
+.card__body {
+  margin-bottom: var(--space-4);
+}
+
+.card__footer {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.card__title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--gray-300);
+  margin: 0 0 var(--space-2) 0;
+}

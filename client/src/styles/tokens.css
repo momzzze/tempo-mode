@@ -1,0 +1,95 @@
+:root {
+  /* =========================
+     COLOR SYSTEM
+     ========================= */
+
+  /* Grayscale base (cool, desaturated) */
+  --gray-950: #0b0e0c;
+  --gray-900: #101411;
+  --gray-850: #151a16;
+  --gray-800: #1b211d;
+  --gray-700: #2a322c;
+  --gray-600: #3a443d;
+  --gray-500: #56625a;
+  --gray-400: #7a887f;
+
+  /* Neon accent (used sparingly) */
+  --neon-500: #33ff88;
+  --neon-400: #2bdc75;
+  --neon-300: #1fae5a;
+
+  /* Accent dim / disabled */
+  --neon-dim-1: rgba(51, 255, 136, 0.35);
+  --neon-dim-2: rgba(51, 255, 136, 0.18);
+
+  /* Status colors (still green-based) */
+  --status-ok: var(--neon-400);
+  --status-warn: #9fa84a; /* muted yellow-green */
+  --status-bad: #7a3a3a; /* muted red-brown */
+
+  /* =========================
+     BORDERS & SURFACES
+     ========================= */
+
+  --border-hairline: 1px;
+  --border-outer: #243029;
+  --border-inner: #0a0f0c;
+
+  --surface-1: var(--gray-900);
+  --surface-2: var(--gray-850);
+  --surface-3: var(--gray-800);
+
+  /* =========================
+     GLOW & SHADOW
+     ========================= */
+
+  --glow-soft: 0 0 6px rgba(51, 255, 136, 0.35);
+  --glow-focus: 0 0 0 2px rgba(51, 255, 136, 0.35);
+  --shadow-panel: inset 0 0 0 1px var(--border-inner);
+
+  /* =========================
+     SPACING SCALE
+     ========================= */
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* =========================
+     RADII
+     ========================= */
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+
+  /* =========================
+     TYPOGRAPHY
+     ========================= */
+
+  --font-ui: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 18px;
+  --font-size-xl: 28px;
+  --font-size-xxl: 44px;
+
+  --line-tight: 1.2;
+  --line-normal: 1.5;
+
+  --letter-wide: 0.08em;
+  --letter-ui: 0.04em;
+}
+
+/*
+DO:
+- Use neon ONLY for active states, running timer, focused controls, CTA
+DON'T:
+- Neon text everywhere
+- Neon borders on static cards
+- Big glows or animations
+*/

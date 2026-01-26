@@ -6,12 +6,14 @@ import { requestLogger } from './middlewares/requestLogger.js';
 import errorHandler from './middlewares/errorHandler.js';
 import routes from './routes/index.js';
 import { checkConnection } from './db/pool.js';
+import { rateLimiter } from './middlewares/rateLimiter.js';
 
 const app = express();
 const port = Number(process.env.PORT) || 4000;
 
 app.use(express.json());
 app.use(requestLogger);
+app.use(rateLimiter);
 app.use('/api', routes);
 
 app.use((_req, res) => {

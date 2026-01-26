@@ -109,6 +109,13 @@ Central tracker for small, verifiable tasks (Ralph Wiggum method). Use GitHub Is
 - Details:
   - Only authenticated users can start/complete sessions
 
+### Task 4.3: Implement Rate Limiting (Issue)
+
+- [ ] Rate limit for session creation
+- Details:
+  - Limit to X requests per minute for each user
+  - Return `429 { error: { message: 'Too Many Requests' } }` if limit exceeded
+
 ---
 
 ## Phase 5: Pomodoro Session Logic (Future)
