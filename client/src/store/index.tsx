@@ -1,148 +1,49 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-} from 'react';
-import type { AuthState, User, LoginPayload, RegisterPayload } from './types';
-import type { AuthAction } from './actions';
-import {
-  AUTH_LOGOUT,
-  AUTH_LOGIN_FAILURE,
-  AUTH_LOGIN_REQUEST,
-  AUTH_LOGIN_SUCCESS,
-  AUTH_REGISTER_SUCCESS,
-  AUTH_REHYDRATE,
-  loginFailure,
-  loginRequest,
-  loginSuccess,
-  logout as logoutAction,
-  rehydrate,
-  registerSuccess,
-} from './actions';
+import { configureStore, createSelector } from '@reduxjs/toolkit';
+import { useDispatch, useSelector } from 'react-redux';
+import type { TypedUseSelectorHook } from 'react-redux';
+import userReducer from './user';
 
-const PERSIST_KEY = 'tempo-mode-auth-v1';
+export const store = configureStore({
+  reducer: {
+    user: userReducer,
+  },
+});
 
-const initialState: AuthState = {
-  user: null,
-  status: 'rehydrating',
-};
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
-function reducer(state: AuthState, action: AuthAction): AuthState {
-  switch (action.type) {
-    case AUTH_REHYDRATE:
-      return {
-        user: action.payload,
-        status: action.payload ? 'authenticated' : 'idle',
-      };
-    case AUTH_LOGIN_REQUEST:
-      return { ...state, status: 'loading', error: undefined };
-    case AUTH_LOGIN_SUCCESS:
-      return {
-        user: action.payload,
-        status: 'authenticated',
-        error: undefined,
-      };
-    case AUTH_LOGIN_FAILURE:
-      return { ...state, status: 'error', error: action.error, user: null };
-    case AUTH_REGISTER_SUCCESS:
-      return {
-        ...state,
-        user: action.payload,
-        status: 'authenticated',
-        error: undefined,
-      };
-    case AUTH_LOGOUT:
-      return { user: null, status: 'idle', error: undefined };
-    default:
-      return state;
-  }
-}
+// Typed hooks
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-function readPersisted(): User | null {
-  try {
-    const raw = window.localStorage.getItem(PERSIST_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as { user?: User | null };
-    if (parsed && parsed.user && typeof parsed.user.token === 'string')
-      return parsed.user;
-    return null;
-  } catch {
-    return null;
-  }
-}
+// Base selectors
+export const selectAuthState = (state: RootState) => state.user;
 
-function writePersisted(user: User | null) {
-  try {
-    window.localStorage.setItem(PERSIST_KEY, JSON.stringify({ user }));
-  } catch {}
-}
+export const selectIsAuthed = createSelector(
+  selectAuthState,
+  (auth) => auth.status === 'authenticated' && !!auth.user?.token
+);
 
-const AuthStateCtx = createContext<AuthState>(initialState);
-const AuthDispatchCtx = createContext<React.Dispatch<AuthAction> | null>(null);
+export const selectUser = createSelector(selectAuthState, (auth) => auth.user);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, initialState);
+export const selectUserEmail = createSelector(
+  selectAuthState,
+  (auth) => auth.user?.email ?? null
+);
 
-  useEffect(() => {
-    const user = readPersisted();
-    dispatch(rehydrate(user));
-  }, []);
+export const selectAuthStatus = createSelector(
+  selectAuthState,
+  (auth) => auth.status
+);
 
-  useEffect(() => {
-    writePersisted(state.user);
-  }, [state.user]);
+export const selectAuthError = createSelector(
+  selectAuthState,
+  (auth) => auth.error
+);
 
-  const memoState = useMemo(() => state, [state]);
-  return (
-    <AuthStateCtx.Provider value={memoState}>
-      <AuthDispatchCtx.Provider value={dispatch}>
-        {children}
-      </AuthDispatchCtx.Provider>
-    </AuthStateCtx.Provider>
-  );
-}
+// Convenience hooks
+export const useAuth = () => useAppSelector(selectAuthState);
 
-export function useAuth() {
-  return useContext(AuthStateCtx);
-}
-
-export function useAuthDispatch() {
-  const ctx = useContext(AuthDispatchCtx);
-  if (!ctx) throw new Error('AuthDispatchCtx not provided');
-  return ctx;
-}
-
-// Async helpers for actions
-export async function performLogin(
-  dispatch: React.Dispatch<AuthAction>,
-  apiLogin: (email: string, password: string) => Promise<User>,
-  payload: LoginPayload
-): Promise<void> {
-  dispatch(loginRequest());
-  try {
-    const user = await apiLogin(payload.email, payload.password);
-    dispatch(loginSuccess(user));
-  } catch (e: any) {
-    dispatch(loginFailure(e?.message ?? 'Login failed'));
-  }
-}
-
-export async function performRegister(
-  dispatch: React.Dispatch<AuthAction>,
-  apiRegister: (email: string, password: string) => Promise<User>,
-  payload: RegisterPayload
-): Promise<void> {
-  try {
-    const user = await apiRegister(payload.email, payload.password);
-    dispatch(registerSuccess(user));
-  } catch (e: any) {
-    dispatch(loginFailure(e?.message ?? 'Register failed'));
-  }
-}
-
-export function logout(dispatch: React.Dispatch<AuthAction>) {
-  writePersisted(null);
-  dispatch(logoutAction());
-}
+// Export actions
+export { loginUser, registerUser, logout, clearError } from './user';
+export type { User } from './user/types';

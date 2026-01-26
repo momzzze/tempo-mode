@@ -1,17 +1,24 @@
-import { useState } from 'react';
-import { useAuthDispatch } from '../store';
-import { performRegister } from '../store';
-import * as authApi from '../api/auth';
+import { useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector, selectIsAuthed } from '../store';
+import { registerUser } from '../store';
 import { useRouter } from '@tanstack/react-router';
+import { toast } from '../components/toast';
 
 export default function Register() {
-  const dispatch = useAuthDispatch();
+  const dispatch = useAppDispatch();
   const router = useRouter();
+  const isAuthed = useAppSelector(selectIsAuthed);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isAuthed) {
+      router.navigate({ to: '/' });
+    }
+  }, [isAuthed, router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,10 +37,13 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await performRegister(dispatch, authApi.register, { email, password });
+      await dispatch(registerUser({ email, password })).unwrap();
+      toast.success('Account created');
       router.navigate({ to: '/app' });
     } catch (e: any) {
-      setError(e?.message ?? 'Register failed');
+      const message = e?.message ?? 'Register failed';
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

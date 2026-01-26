@@ -1,5 +1,5 @@
 import { api } from './client';
-import type { User } from '../store/types';
+import type { User } from '../store';
 
 export async function register(email: string, password: string): Promise<User> {
   const res = await api.post<{ user: Omit<User, 'token'> } & { token: string }>(

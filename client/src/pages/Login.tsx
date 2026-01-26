@@ -1,16 +1,23 @@
-import { useState } from 'react';
-import { useAuthDispatch } from '../store';
-import { performLogin } from '../store';
-import * as authApi from '../api/auth';
+import { useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector, selectIsAuthed } from '../store';
+import { loginUser } from '../store';
 import { useRouter } from '@tanstack/react-router';
+import { toast } from '../components/toast';
 
 export default function Login() {
-  const dispatch = useAuthDispatch();
+  const dispatch = useAppDispatch();
   const router = useRouter();
+  const isAuthed = useAppSelector(selectIsAuthed);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isAuthed) {
+      router.navigate({ to: '/' });
+    }
+  }, [isAuthed, router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,10 +28,13 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      await performLogin(dispatch, authApi.login, { email, password });
+      await dispatch(loginUser({ email, password })).unwrap();
+      toast.success('Signed in successfully');
       router.navigate({ to: '/app' });
     } catch (e: any) {
-      setError(e?.message ?? 'Login failed');
+      const message = e?.message ?? 'Login failed';
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

@@ -5,7 +5,7 @@ Monorepo with an Express (TypeScript, ESM) API and a Vite + React + TypeScript f
 ## Stack
 
 - Server: Express, PostgreSQL (pg), pino, TypeScript (NodeNext ESM)
-- Client: Vite, React, TypeScript, Tailwind, shadcn/ui
+- Client: Vite, React, TypeScript, Tailwind, shadcn/ui, Redux Toolkit
 - Tooling: pnpm workspaces
 
 ## Workspace Layout
@@ -70,6 +70,8 @@ VITE_API_URL=http://localhost:8080
 - `GET /api/health` — DB connectivity check
 - `POST /api/auth/register` — body `{ email, password }`
 - `POST /api/auth/login` — body `{ email, password }`, returns JWT
+
+**Note**: Authentication state is managed by Redux Toolkit without persistence. The JWT token and user data are stored in memory only and will be lost on page refresh.
 
 ## Postman
 

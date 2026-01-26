@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 dotenv.config();
 import logger from './utils/logger.js';
@@ -11,6 +12,37 @@ import { rateLimiter } from './middlewares/rateLimiter.js';
 const app = express();
 const port = Number(process.env.PORT) || 4000;
 
+// CORS configuration - allow multiple localhost ports in development
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) return callback(null, true);
+
+      // In development, allow any localhost origin
+      if (
+        process.env.NODE_ENV !== 'production' &&
+        origin.startsWith('http://localhost')
+      ) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(requestLogger);
 app.use(rateLimiter);

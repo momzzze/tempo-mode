@@ -1,19 +1,20 @@
 import { useEffect } from 'react';
-import { useAuth, useAuthDispatch, logout } from '../store';
+import { useAuth, useAppDispatch, logout } from '../store';
 import { useRouter } from '@tanstack/react-router';
+import { toast } from '../components/toast';
 
 export default function AppShell() {
   const auth = useAuth();
-  const dispatch = useAuthDispatch();
+  const dispatch = useAppDispatch();
   const router = useRouter();
 
   useEffect(() => {
-    if (auth.status !== 'rehydrating' && (!auth.user || !auth.user.token)) {
+    if (auth.status !== 'loading' && (!auth.user || !auth.user.token)) {
       router.navigate({ to: '/login' });
     }
   }, [auth.status, auth.user, router]);
 
-  if (auth.status === 'rehydrating') {
+  if (auth.status === 'loading') {
     return <div style={{ padding: 'var(--space-6)' }}>Loading…</div>;
   }
 
@@ -28,7 +29,8 @@ export default function AppShell() {
         <button
           className="btn"
           onClick={() => {
-            logout(dispatch);
+            dispatch(logout());
+            toast.info('Signed out');
             router.navigate({ to: '/login' });
           }}
         >

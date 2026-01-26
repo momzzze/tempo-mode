@@ -7,6 +7,7 @@
 @import './styles/components/segmented.css';
 @import './styles/components/terminal.css';
 @import './styles/components/inputs.css';
+@import './styles/components/toast.css';
 @import './styles/pages/pomodoro.css';
 @import './styles/pages/settings.css';
 @import './styles/pages/stats.css';
