@@ -191,12 +191,20 @@ Server should read:
 
 ### Client conventions
 
-- Use React + TypeScript.
-- Use Tailwind and shadcn/ui components.
-- Keep UI components reusable.
+- React + TypeScript (Vite scaffold).
+- Tailwind + shadcn/ui allowed; keep components reusable.
 - Do not hardcode backend URLs; use `VITE_API_URL`.
 
-**Status**: Vite + React + TypeScript scaffold created. Tailwind + shadcn/ui setup pending.
+### Current timer implementation (do not regress)
+
+- Modes: only `focus` and `break` (no long break).
+- Auto-transition focus ↔ break; respects `autoStart` toggle.
+- Timer state persisted to `localStorage` (mode, seconds, running flag, task, stats).
+- Settings live in Redux `timerSettings` slice and drive the timer (durations, toggles, triggers for complete/restart/add time).
+- Settings menu is attached to the timer card (3 dots shown on hover), dark transparent dropdown with arrow, slim underlined inputs for minutes.
+- Controls: Start/Pause only (no Reset). Keep hover-reveal for the settings trigger.
+
+If updating UI, keep the settings dropdown under the trigger (not in the navbar) and preserve the dark translucent styling with arrow.
 
 ---
 

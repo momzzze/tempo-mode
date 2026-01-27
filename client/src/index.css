@@ -1,17 +1,7 @@
+@import 'tailwindcss';
 @import './styles/tokens.css';
 @import './styles/base.css';
 @import './styles/layout.css';
-@import './styles/components/card.css';
-@import './styles/components/button.css';
-@import './styles/components/divider.css';
-@import './styles/components/segmented.css';
-@import './styles/components/terminal.css';
-@import './styles/components/inputs.css';
-@import './styles/components/toast.css';
-@import './styles/pages/pomodoro.css';
-@import './styles/pages/settings.css';
-@import './styles/pages/stats.css';
-@import './styles/pages/auth.css';
 
 /* Accessibility: Respect motion preferences */
 @media (prefers-reduced-motion: reduce) {

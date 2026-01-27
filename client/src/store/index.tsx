@@ -2,11 +2,27 @@ import { configureStore, createSelector } from '@reduxjs/toolkit';
 import { useDispatch, useSelector } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
 import userReducer from './user';
+import timerSettingsReducer from './timerSettings';
+
+const PERSIST_KEY = 'tempo-mode-auth';
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
+    timerSettings: timerSettingsReducer,
   },
+});
+
+// Persist middleware
+store.subscribe(() => {
+  const state = store.getState();
+  try {
+    if (state.user.user) {
+      localStorage.setItem(PERSIST_KEY, JSON.stringify(state.user.user));
+    } else {
+      localStorage.removeItem(PERSIST_KEY);
+    }
+  } catch {}
 });
 
 export type RootState = ReturnType<typeof store.getState>;
@@ -45,5 +61,17 @@ export const selectAuthError = createSelector(
 export const useAuth = () => useAppSelector(selectAuthState);
 
 // Export actions
-export { loginUser, registerUser, logout, clearError } from './user';
+export { loginUser, registerUser, logout, clearError, rehydrate } from './user';
 export type { User } from './user/types';
+export {
+  setFocusDuration,
+  setBreakDuration,
+  toggleSound,
+  toggleAutoStart,
+  toggleHideSeconds,
+  toggleNotifications,
+  completeTimer,
+  restartTimer,
+  addTimeToTimer,
+  setTimerStyle,
+} from './timerSettings';

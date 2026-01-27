@@ -45,6 +45,14 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
+    rehydrate: (state, action: PayloadAction<User | null>) => {
+      if (action.payload && action.payload.token) {
+        state.user = action.payload;
+        state.status = 'authenticated';
+      } else {
+        state.status = 'idle';
+      }
+    },
     logout: (state) => {
       state.user = null;
       state.status = 'idle';
@@ -90,6 +98,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = userSlice.actions;
+export const { rehydrate, logout, clearError } = userSlice.actions;
 export default userSlice.reducer;
 export type { User } from './types';

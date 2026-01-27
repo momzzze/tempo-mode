@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type Palette = 'green' | 'amber' | 'mono';
 type Mode = 'dark' | 'light';
@@ -46,17 +47,17 @@ export default function ThemeDropdown({
   }, [open]);
 
   return (
-    <div
-      ref={dropdownRef}
-      style={{ position: 'relative', display: 'inline-block' }}
-    >
-      <button
-        className="btn btn--icon"
+    <div ref={dropdownRef} className="relative inline-block">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
         onClick={() => setOpen(!open)}
         title="Theme Settings"
+        className="text-white/70 hover:text-white hover:bg-white/10"
       >
-        <Settings size={16} />
-      </button>
+        <Settings size={20} />
+      </Button>
       {open && (
         <div
           className="theme-dropdown"

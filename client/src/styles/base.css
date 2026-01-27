@@ -2,6 +2,8 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html {
@@ -15,6 +17,13 @@ body {
   color: var(--text-1);
   font-size: var(--font-size-md);
   line-height: var(--line-normal);
+}
+
+/* Ensure the shell and background layers can always fill the viewport */
+html,
+body,
+#root {
+  min-height: 100vh;
 }
 
 /* Fog mode backdrop support */
