@@ -54,7 +54,7 @@ export default function ThemeDropdown({
         size="icon"
         onClick={() => setOpen(!open)}
         title="Theme Settings"
-        className="text-white/70 hover:text-white hover:bg-white/10"
+        className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10 cursor-pointer"
       >
         <Settings size={20} />
       </Button>

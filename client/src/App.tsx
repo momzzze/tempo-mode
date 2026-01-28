@@ -53,100 +53,111 @@ export default function App() {
           style={{ backgroundImage: `url(${backgroundUrl})` }}
         />
       )}
-      <div className="fixed inset-0 z-0 bg-black/40" />
+      <div className="fixed inset-0 z-0 bg-black/30" />
 
+      <div
+        className="pointer-events-none fixed inset-0 z-[1]"
+        aria-hidden="true"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 68%, rgba(0,0,0,0.9) 100%)',
+        }}
+      />
       {/* Content */}
       <div className="relative z-10">
         {/* App Header */}
         <header className="sticky top-0 z-50 border-b border-white/5 bg-transparent backdrop-blur-md">
-          <div className="flex items-center justify-between px-6 py-3">
-            <div className="text-lg font-semibold tracking-wider text-white/80 ">
-              tempo-mode
-            </div>
-            <div className="flex items-center gap-2 justify-center">
-              <Button
-                variant="ghost"
-                size="icon"
-                asChild
-                title="Home"
-                className="text-white/70 hover:text-white hover:bg-white/10"
-              >
-                <Link to="/">
-                  <Home size={20} />
-                </Link>
-              </Button>
+          <div className="shell">
+            <div className="flex items-center justify-between">
+              <div className="text-lg font-semibold tracking-wider text-white/80">
+                tempo-mode
+              </div>
+              <div className="flex items-center gap-2 justify-center">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                  title="Home"
+                  className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10"
+                >
+                  <Link to="/">
+                    <Home size={20} />
+                  </Link>
+                </Button>
 
-              {!isAuthed && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    asChild
-                    title="Login"
-                    className="text-white/70 hover:text-white hover:bg-white/10"
-                  >
-                    <Link to="/login">
-                      <LogIn size={20} />
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    asChild
-                    title="Register"
-                    className="text-white/70 hover:text-white hover:bg-white/10"
-                  >
-                    <Link to="/register">
-                      <UserPlus size={20} />
-                    </Link>
-                  </Button>
-                </>
-              )}
+                {!isAuthed && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      asChild
+                      title="Login"
+                      className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10"
+                    >
+                      <Link to="/login">
+                        <LogIn size={20} />
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      asChild
+                      title="Register"
+                      className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10"
+                    >
+                      <Link to="/register">
+                        <UserPlus size={20} />
+                      </Link>
+                    </Button>
+                  </>
+                )}
 
-              {isAuthed && (
+                {isAuthed && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      asChild
+                      title="App"
+                      className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10"
+                    >
+                      <Link to="/app">
+                        <LayoutDashboard size={20} />
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Logout"
+                      className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10 cursor-pointer"
+                      onClick={() => {
+                        dispatch(logout());
+                        router.navigate({ to: '/' });
+                      }}
+                    >
+                      <LogOut size={20} />
+                    </Button>
+                  </>
+                )}
                 <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    asChild
-                    title="App"
-                    className="text-white/70 hover:text-white hover:bg-white/10"
-                  >
-                    <Link to="/app">
-                      <LayoutDashboard size={20} />
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    title="Logout"
-                    className="text-white/70 hover:text-white hover:bg-white/10"
-                    onClick={() => {
-                      dispatch(logout());
-                      router.navigate({ to: '/' });
-                    }}
-                  >
-                    <LogOut size={20} />
-                  </Button>
+                  <ThemeDropdown
+                    palettes={palettes}
+                    modes={modes}
+                    currentPalette={currentPalette}
+                    currentMode={currentMode}
+                    currentLayer={layer}
+                    onPaletteChange={setPalette}
+                    onModeChange={setMode}
+                    onLayerChange={setLayer}
+                  />
                 </>
-              )}
-              <>
-                <ThemeDropdown
-                  palettes={palettes}
-                  modes={modes}
-                  currentPalette={currentPalette}
-                  currentMode={currentMode}
-                  currentLayer={layer}
-                  onPaletteChange={setPalette}
-                  onModeChange={setMode}
-                  onLayerChange={setLayer}
-                />
-              </>
+              </div>
             </div>
           </div>
         </header>
-
-        <Outlet />
+        <div className="min-h-[calc(100vh-64px)] justify-center flex py-8 items-center">
+          <Outlet />
+        </div>
       </div>
     </div>
   );

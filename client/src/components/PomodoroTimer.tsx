@@ -26,7 +26,6 @@ interface PomodoroTimerProps {
   variant: 'minimal' | 'halo';
   settingsSlot?: React.ReactNode;
 }
-
 export function PomodoroTimer({
   mode,
   onModeChange,
@@ -39,116 +38,150 @@ export function PomodoroTimer({
   variant,
   settingsSlot,
 }: PomodoroTimerProps) {
+  const isHalo = variant === 'halo';
+
   return (
-    <Timer variant={variant}>
-      <TimerHeader>{settingsSlot}</TimerHeader>
+    <Timer
+      variant={variant}
+      className={cn(
+        'w-full grid place-items-center py-10',
+        '!bg-transparent !border-0 !shadow-none !p-0 !max-w-none',
+        'overflow-visible',
+        isHalo && 'text-white'
+      )}
+    >
+      <TimerHeader
+        className={cn(isHalo && 'absolute top-6 right-6', 'z-[150]')}
+      >
+        {settingsSlot}
+      </TimerHeader>
 
-      <TimerModeSelector>
-        <Tabs
-          value={mode}
-          onValueChange={(val) => onModeChange(val as 'focus' | 'break')}
-          className="w-full max-w-md mx-auto"
-        >
-          <TabsList
+      <div
+        className={cn(
+          'relative w-[min(84vw,520px)] aspect-square grid place-items-center',
+          isHalo && 'select-none'
+        )}
+      >
+        {/* Ring */}
+        {isHalo && <TimerRing className="absolute inset-0" />}
+
+        {/* Content inside ring */}
+        <div className="relative z-10 w-full h-full grid place-items-center">
+          {/* Tabs near top inside ring */}
+          <TimerModeSelector className="absolute top-[22%] left-1/2 -translate-x-1/2">
+            <Tabs
+              value={mode}
+              onValueChange={(val) => onModeChange(val as 'focus' | 'break')}
+              className="w-auto"
+            >
+              <TabsList
+                className={cn(
+                  'bg-transparent p-0 h-auto gap-8'
+                  // no pill background — like the screenshot
+                )}
+              >
+                <TabsTrigger
+                  value="focus"
+                  className={cn(
+                    'p-0 h-auto bg-transparent shadow-none rounded-none',
+                    'uppercase tracking-widest text-sm font-semibold',
+                    'text-white/60 data-[state=active]:text-white',
+                    'data-[state=active]:underline underline-offset-[10px] decoration-white/60'
+                  )}
+                >
+                  Focus
+                </TabsTrigger>
+                <TabsTrigger
+                  value="break"
+                  className={cn(
+                    'p-0 h-auto bg-transparent shadow-none rounded-none',
+                    'uppercase tracking-widest text-sm font-semibold',
+                    'text-white/60 data-[state=active]:text-white',
+                    'data-[state=active]:underline underline-offset-[10px] decoration-white/60'
+                  )}
+                >
+                  Break
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </TimerModeSelector>
+
+          {/* Big digits centered */}
+          <TimerDigits
+            variant={variant}
+            isRunning={isRunning}
             className={cn(
-              'w-full grid grid-cols-2',
-              variant === 'halo' &&
-                'bg-transparent border-2 border-white/40 backdrop-blur-none',
-              variant === 'minimal' &&
-                'bg-white/15 border border-white/20 backdrop-blur-sm'
+              'font-sans tabular-nums leading-none',
+              'text-[clamp(64px,14vw,120px)]',
+              'tracking-tight'
             )}
           >
-            <TabsTrigger
-              value="focus"
-              className={cn(
-                'uppercase tracking-wider font-semibold text-sm',
-                variant === 'halo' &&
-                  'data-[state=active]:bg-transparent data-[state=active]:border data-[state=active]:border-white/50 data-[state=active]:text-white/95 text-white/75 bg-transparent',
-                variant === 'minimal' &&
-                  'data-[state=active]:bg-white/25 data-[state=active]:text-white text-white/80'
-              )}
-            >
-              Focus
-            </TabsTrigger>
-            <TabsTrigger
-              value="break"
-              className={cn(
-                'uppercase tracking-wider font-semibold text-sm',
-                variant === 'halo' &&
-                  'data-[state=active]:bg-transparent data-[state=active]:border data-[state=active]:border-white/50 data-[state=active]:text-white/95 text-white/75 bg-transparent',
-                variant === 'minimal' &&
-                  'data-[state=active]:bg-white/25 data-[state=active]:text-white text-white/80'
-              )}
-            >
-              Break
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </TimerModeSelector>
+            {timeDisplay}
+          </TimerDigits>
 
-      <div className="relative">
-        {variant === 'halo' && <TimerRing />}
-
-        <TimerDigits variant={variant} isRunning={isRunning}>
-          {timeDisplay}
-        </TimerDigits>
-
-        <TimerControls>
-          {!isRunning ? (
-            <Button
-              onClick={onStart}
-              size="lg"
-              className={cn(
-                variant === 'halo' &&
-                  'bg-transparent border-2 border-green-400/70 text-green-400/95 hover:bg-green-400/10 hover:border-green-400/90 backdrop-blur-none',
-                variant === 'minimal' &&
-                  'bg-white/15 border border-white/25 text-white hover:bg-white/25 backdrop-blur-sm'
-              )}
-            >
-              Start
-            </Button>
-          ) : (
-            <Button
-              onClick={onPause}
-              size="lg"
-              variant="outline"
-              className={cn(
-                variant === 'halo' &&
-                  'bg-transparent border-2 border-white/50 text-white/95 hover:bg-white/10 hover:border-white/80 backdrop-blur-none',
-                variant === 'minimal' &&
-                  'bg-white/15 border border-white/25 text-white hover:bg-white/25 backdrop-blur-sm'
-              )}
-            >
-              Pause
-            </Button>
-          )}
-        </TimerControls>
-
-        <TimerTaskInput variant={variant}>
-          <Label
-            htmlFor="task"
-            className={cn(
-              'block mb-2 text-sm uppercase tracking-wider',
-              variant === 'halo' &&
-                'text-white/70 text-base tracking-wide font-normal',
-              variant === 'minimal' && 'text-white/60'
-            )}
+          {/* Task line under digits */}
+          <TimerTaskInput
+            variant={variant}
+            className="absolute bottom-[24%] left-1/2 -translate-x-1/2 w-[86%]"
           >
-            I will focus on...
-          </Label>
-          <Input
-            id="task"
-            value={task}
-            onChange={(e) => onTaskChange(e.target.value)}
-            placeholder="What are you focusing on?"
-            className={cn(
-              variant === 'halo' &&
-                'bg-transparent border-none border-b border-white/35 rounded-none text-center text-lg text-white/92 placeholder:text-white/50 focus-visible:border-white/60 focus-visible:ring-0',
-              variant === 'minimal' &&
-                'bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus-visible:ring-white/30'
+            <Label
+              htmlFor="task"
+              className={cn(
+                'block text-center',
+                'text-white/85',
+                'font-mono text-[clamp(18px,3.2vw,28px)]',
+                'tracking-wide'
+              )}
+            >
+              I will focus on…
+            </Label>
+
+            {/* Optional: keep input but make it invisible/clean like the screenshot */}
+            <Input
+              id="task"
+              value={task}
+              onChange={(e) => onTaskChange(e.target.value)}
+              placeholder=""
+              className={cn(
+                'mt-3',
+                'bg-transparent border-0 border-b border-white/25 rounded-none',
+                'text-center text-white/90 font-mono',
+                'focus-visible:ring-0 focus-visible:border-white/45',
+                'placeholder:text-white/40'
+              )}
+            />
+          </TimerTaskInput>
+
+          {/* Round control button like screenshot */}
+          <TimerControls className="absolute bottom-[10%] left-1/2 -translate-x-1/2">
+            {!isRunning ? (
+              <Button
+                onClick={onStart}
+                className={cn(
+                  'h-14 w-14 rounded-full p-0',
+                  'bg-white/15 hover:bg-white/20',
+                  'border border-white/20 text-white',
+                  'backdrop-blur-sm'
+                )}
+              >
+                Start
+              </Button>
+            ) : (
+              <Button
+                onClick={onPause}
+                className={cn(
+                  'h-14 w-14 rounded-full p-0',
+                  'bg-white/15 hover:bg-white/20',
+                  'border border-white/20 text-white',
+                  'backdrop-blur-sm'
+                )}
+              >
+                {/* If you want icon-only: use lucide Pause */}
+                Pause
+              </Button>
             )}
-          />
-        </TimerTaskInput>
+          </TimerControls>
+        </div>
       </div>
     </Timer>
   );

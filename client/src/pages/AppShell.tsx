@@ -19,6 +19,8 @@ import { toast } from '../components/toast';
 import { PomodoroSettings } from '../components/PomodoroSettings';
 import { PomodoroTimer } from '../components/PomodoroTimer';
 import { fetchRandomWorldImage } from '../services/pexelsService';
+import { DraggablePanel } from '../components/DraggablePanel';
+import { cn } from '@/lib/utils';
 
 type TimerMode = 'focus' | 'break';
 
@@ -271,8 +273,51 @@ export default function AppShell() {
   const showBackground =
     (layer === 'fog' || variant === 'halo') && !!backgroundUrl;
 
+  const statPanels = useMemo(
+    () => [
+      {
+        id: 'mode',
+        title: 'Mode',
+        content: mode === 'focus' ? 'Focus' : 'Break',
+        initial: { x: 24, y: 120 },
+      },
+      {
+        id: 'completed',
+        title: 'Completed',
+        content: `${completed} sessions`,
+        initial: { x: 220, y: 120 },
+      },
+      {
+        id: 'focus-time',
+        title: 'Focus Time',
+        content: `${Math.floor(totalFocusSec / 60)} mins focused`,
+        initial: { x: 416, y: 120 },
+      },
+      {
+        id: 'task',
+        title: 'Task',
+        content: task || 'Not set',
+        initial: { x: 612, y: 120 },
+      },
+      {
+        id: 'session-log',
+        title: 'Session Log',
+        content: (
+          <ul className="space-y-1 text-white/80 list-disc list-inside">
+            <li>Stay focused. One session at a time.</li>
+            <li>Hover over timer for settings (⋮).</li>
+            <li>Switch modes for breaks.</li>
+            <li>Set task to track your intent.</li>
+          </ul>
+        ),
+        initial: { x: 24, y: 300 },
+      },
+    ],
+    [mode, completed, totalFocusSec, task]
+  );
+
   return (
-    <div className="relative min-h-screen bg-neutral-950 text-white overflow-hidden">
+    <div className={cn('relative text-white overflow-y-auto')}>
       {showBackground && (
         <div className="fixed inset-0 -z-10 opacity-100 transition-opacity duration-500">
           <img
@@ -298,7 +343,7 @@ export default function AppShell() {
               : 'w-full flex flex-col items-center'
           }
         >
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center overflow-visible">
             <PomodoroTimer
               mode={mode}
               onModeChange={(next) => switchMode(next)}
@@ -336,57 +381,28 @@ export default function AppShell() {
                   }}
                   timerStyle={timerStyle}
                   onStyleChange={(style) => dispatch(setTimerStyle(style))}
+                  secondsLeft={secondsLeft}
+                  totalSeconds={
+                    mode === 'focus' ? focusDuration * 60 : breakDuration * 60
+                  }
                 />
               }
             />
-
-            {variant === 'minimal' && (
-              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
-                {[
-                  {
-                    label: 'Mode',
-                    value: mode === 'focus' ? 'Focus' : 'Break',
-                  },
-                  { label: 'Completed', value: completed },
-                  {
-                    label: 'Focus time',
-                    value: `${Math.floor(totalFocusSec / 60)} mins`,
-                  },
-                  { label: 'Task', value: task || 'Not set' },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-lg border border-white/10 bg-white/5 px-3 py-3 text-center"
-                  >
-                    <div className="text-xs uppercase tracking-wide text-white/60">
-                      {item.label}
-                    </div>
-                    <div className="mt-1 text-sm font-semibold text-white/90">
-                      {item.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
-
-          {variant === 'minimal' && (
-            <div className="grid gap-4">
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                <div className="text-xs uppercase tracking-wide text-white/60 mb-2">
-                  Session Log
-                </div>
-                <div className="space-y-1 text-sm text-white/80">
-                  <div>► Stay focused. One session at a time.</div>
-                  <div>► Hover over timer for settings (⋮)</div>
-                  <div>► Switch modes for breaks</div>
-                  <div>► Set task to track your intent</div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Floating draggable panels */}
+      {statPanels.map((panel) => (
+        <DraggablePanel
+          key={panel.id}
+          id={panel.id}
+          title={panel.title}
+          initialPosition={panel.initial}
+        >
+          {panel.content}
+        </DraggablePanel>
+      ))}
     </div>
   );
 }

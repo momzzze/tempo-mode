@@ -13,7 +13,7 @@ const Timer = React.forwardRef<HTMLDivElement, TimerProps>(
         className={cn(
           'relative text-center',
           variant === 'minimal' &&
-            'bg-neutral-900/50 border border-white/10 rounded-2xl backdrop-blur-xl p-8 max-w-[600px]',
+            'bg-transparent border-0 rounded-2xl p-0 max-w-none',
           variant === 'halo' && 'bg-transparent max-w-[800px] mx-auto p-6',
           className
         )}

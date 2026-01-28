@@ -80,3 +80,31 @@ select {
   font-family: inherit;
   font-size: inherit;
 }
+
+/* Remove native autofill background tint */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-1) !important;
+  caret-color: var(--text-1);
+  background-color: transparent !important;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  transition:
+    background-color 9999s ease-out,
+    color 0s;
+  background-clip: padding-box;
+}
+
+.shell {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-left: clamp(16px, 4vw, 72px);
+  padding-right: clamp(16px, 4vw, 72px);
+}

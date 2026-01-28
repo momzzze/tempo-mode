@@ -1,20 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { MoreVertical, Check } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
 
-type TimerStyle = 'classic' | 'halo';
-
-const STYLE_OPTIONS: Array<{
-  id: TimerStyle;
-  label: string;
-  note: string;
-}> = [
-  { id: 'classic', label: 'Minimal', note: 'Compact panel UI' },
-  { id: 'halo', label: 'Halo', note: 'Full-screen ring display' },
-];
+type TimerStyle = 'classic';
 
 interface PomodoroSettingsProps {
   onComplete: () => void;
@@ -32,8 +22,10 @@ interface PomodoroSettingsProps {
   onHideSecondsToggle: () => void;
   notifications: boolean;
   onNotificationsToggle: () => void;
-  timerStyle: TimerStyle;
-  onStyleChange: (style: TimerStyle) => void;
+  timerStyle?: TimerStyle;
+  onStyleChange?: (style: TimerStyle) => void;
+  secondsLeft?: number;
+  totalSeconds?: number;
 }
 
 export function PomodoroSettings({
@@ -54,6 +46,8 @@ export function PomodoroSettings({
   onNotificationsToggle,
   timerStyle,
   onStyleChange,
+  secondsLeft = 0,
+  totalSeconds = 1,
 }: PomodoroSettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -78,108 +72,267 @@ export function PomodoroSettings({
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
-        className="h-9 w-9 rounded-full bg-black/30 border border-white/20 text-white/90 hover:bg-black/50 hover:text-white shadow-sm backdrop-blur"
+        className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10"
         title="Timer settings"
       >
-        <MoreVertical size={18} />
+        <MoreVertical size={20} />
       </Button>
 
       {isOpen && (
-        <div className="absolute top-11 right-0 w-72 rounded-xl border border-white/15 bg-black/85 text-white shadow-2xl backdrop-blur-xl z-50 p-3 space-y-3">
-          <div className="text-sm font-semibold px-1">Pomodoro</div>
-
-          <div className="grid grid-cols-2 gap-2">
-            {STYLE_OPTIONS.map((style) => {
-              const active = timerStyle === style.id;
-              return (
-                <button
-                  key={style.id}
-                  onClick={() =>
-                    timerStyle !== style.id && onStyleChange(style.id)
-                  }
-                  className={cn(
-                    'rounded-md border border-white/15 bg-white/5 px-3 py-2 text-left transition-colors',
-                    active &&
-                      'border-emerald-400/60 bg-emerald-400/10 shadow-[0_0_0_1px_rgba(16,185,129,0.35)]'
-                  )}
-                >
-                  <div className="flex items-center justify-between text-sm font-semibold tracking-wide">
-                    <span>{style.label}</span>
-                    {active && <Check size={14} />}
-                  </div>
-                  <div className="mt-1 text-xs text-white/70 leading-tight">
-                    {style.note}
-                  </div>
-                </button>
-              );
-            })}
+        <div
+          style={{
+            position: 'absolute',
+            top: '100%',
+            right: 0,
+            marginTop: '4px',
+            minWidth: '280px',
+            background: 'var(--surface-1)',
+            border: '1px solid var(--border-outer)',
+            borderRadius: 'var(--radius-sm)',
+            zIndex: 100,
+            padding: 'var(--space-2)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 'var(--font-size-xs)',
+              color: 'var(--gray-500)',
+              marginBottom: 'var(--space-2)',
+              textTransform: 'uppercase',
+              letterSpacing: 'var(--letter-ui)',
+            }}
+          >
+            Settings
           </div>
 
-          <div className="h-px bg-white/10" />
+          <div
+            style={{
+              marginBottom: 'var(--space-2)',
+              display: 'flex',
+              gap: 'var(--space-1)',
+              alignItems: 'center',
+            }}
+          >
+            <div
+              style={{
+                flex: 1,
+                height: '4px',
+                background: 'var(--surface-2)',
+                borderRadius: '2px',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  height: '100%',
+                  background: `linear-gradient(90deg, var(--neon-400), var(--neon-300))`,
+                  width: `${Math.max(0, Math.min(100, (secondsLeft / totalSeconds) * 100))}%`,
+                  transition: 'width 0.3s ease-out',
+                  borderRadius: '2px',
+                  boxShadow: '0 0 8px rgba(52, 211, 153, 0.6)',
+                }}
+              />
+            </div>
+            <span
+              style={{
+                fontSize: 'var(--font-size-xs)',
+                color: 'var(--gray-500)',
+                minWidth: '28px',
+              }}
+            >
+              {Math.ceil(secondsLeft / 60)}m
+            </span>
+          </div>
 
-          <div className="space-y-1">
+          <div style={{ marginBottom: 'var(--space-2)' }}>
             <button
-              className="w-full rounded-md px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10 transition-colors"
+              style={{
+                width: '100%',
+                padding: 'var(--space-1) var(--space-2)',
+                fontSize: 'var(--font-size-xs)',
+                background: 'var(--surface-2)',
+                color: 'var(--gray-400)',
+                border: 'none',
+                borderRadius: 'var(--radius-xs)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease-out',
+                textAlign: 'left',
+              }}
               onClick={() => {
                 onComplete();
                 setIsOpen(false);
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--gray-300)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--gray-400)';
               }}
             >
               Complete timer
             </button>
             <button
-              className="w-full rounded-md px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10 transition-colors"
+              style={{
+                width: '100%',
+                padding: 'var(--space-1) var(--space-2)',
+                fontSize: 'var(--font-size-xs)',
+                background: 'var(--surface-2)',
+                color: 'var(--gray-400)',
+                border: 'none',
+                borderRadius: 'var(--radius-xs)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease-out',
+                textAlign: 'left',
+                marginTop: 'var(--space-1)',
+              }}
               onClick={() => {
                 onRestart();
                 setIsOpen(false);
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--gray-300)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--gray-400)';
               }}
             >
               Restart timer
             </button>
             <button
-              className="w-full rounded-md px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10 transition-colors"
+              style={{
+                width: '100%',
+                padding: 'var(--space-1) var(--space-2)',
+                fontSize: 'var(--font-size-xs)',
+                background: 'var(--surface-2)',
+                color: 'var(--gray-400)',
+                border: 'none',
+                borderRadius: 'var(--radius-xs)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease-out',
+                textAlign: 'left',
+                marginTop: 'var(--space-1)',
+              }}
               onClick={() => {
                 onAddTime();
                 setIsOpen(false);
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--gray-300)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--gray-400)';
               }}
             >
               + Add 10 minutes
             </button>
           </div>
 
-          <div className="h-px bg-white/10" />
+          <div
+            style={{
+              height: '1px',
+              background: 'var(--border-inner)',
+              marginBottom: 'var(--space-2)',
+            }}
+          />
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 rounded-md px-2 py-1.5 text-sm text-white/90">
-              <Label className="flex-1 text-white/90">Focus</Label>
+          <div style={{ marginBottom: 'var(--space-2)' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-2)',
+                marginBottom: 'var(--space-1)',
+              }}
+            >
+              <Label
+                style={{
+                  flex: 1,
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--gray-400)',
+                }}
+              >
+                Focus
+              </Label>
               <Input
                 type="number"
                 min={1}
                 max={120}
                 value={focusDuration}
                 onChange={(e) => onFocusChange(Number(e.target.value))}
-                className="w-20 text-right bg-transparent border-white/40 text-white"
+                style={{
+                  width: '60px',
+                  textAlign: 'right',
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--border-outer)',
+                  borderRadius: 'var(--radius-xs)',
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--gray-400)',
+                  padding: 'var(--space-1)',
+                }}
               />
-              <span className="text-xs text-white/60">min</span>
+              <span
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--gray-500)',
+                }}
+              >
+                min
+              </span>
             </div>
 
-            <div className="flex items-center gap-3 rounded-md px-2 py-1.5 text-sm text-white/90">
-              <Label className="flex-1 text-white/90">Break</Label>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-2)',
+              }}
+            >
+              <Label
+                style={{
+                  flex: 1,
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--gray-400)',
+                }}
+              >
+                Break
+              </Label>
               <Input
                 type="number"
                 min={1}
                 max={60}
                 value={breakDuration}
                 onChange={(e) => onBreakChange(Number(e.target.value))}
-                className="w-20 text-right bg-transparent border-white/40 text-white"
+                style={{
+                  width: '60px',
+                  textAlign: 'right',
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--border-outer)',
+                  borderRadius: 'var(--radius-xs)',
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--gray-400)',
+                  padding: 'var(--space-1)',
+                }}
               />
-              <span className="text-xs text-white/60">min</span>
+              <span
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--gray-500)',
+                }}
+              >
+                min
+              </span>
             </div>
           </div>
 
-          <div className="h-px bg-white/10" />
+          <div
+            style={{
+              height: '1px',
+              background: 'var(--border-inner)',
+              marginBottom: 'var(--space-2)',
+            }}
+          />
 
-          <div className="space-y-1.5">
+          <div>
             {[
               {
                 label: 'Timer sound effects',
@@ -201,24 +354,62 @@ export function PomodoroSettings({
                 enabled: notifications,
                 onToggle: onNotificationsToggle,
               },
-            ].map((item) => (
+            ].map((item, idx) => (
               <button
                 key={item.label}
-                className="w-full flex items-center justify-between rounded-md px-3 py-2 text-sm text-white/90 hover:bg-white/10 transition-colors"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: 'var(--space-1) var(--space-2)',
+                  fontSize: 'var(--font-size-xs)',
+                  background: 'var(--surface-2)',
+                  color: 'var(--gray-400)',
+                  border: 'none',
+                  borderRadius: 'var(--radius-xs)',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease-out',
+                  marginTop: idx > 0 ? 'var(--space-1)' : 0,
+                }}
                 onClick={() => {
                   item.onToggle();
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--gray-300)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--gray-400)';
                 }}
                 aria-pressed={item.enabled}
               >
                 <span>{item.label}</span>
                 <span
-                  className={cn(
-                    'h-5 w-10 rounded-full border border-white/30 bg-white/15 transition-all flex items-center px-1',
-                    item.enabled &&
-                      'border-emerald-400 bg-emerald-400/20 justify-end'
-                  )}
+                  style={{
+                    height: '16px',
+                    width: '28px',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border-outer)',
+                    background: item.enabled
+                      ? 'var(--neon-400)'
+                      : 'var(--surface-3)',
+                    transition: 'all 0.15s ease-out',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: item.enabled ? 'flex-end' : 'flex-start',
+                    padding: '2px',
+                  }}
                 >
-                  {item.enabled && <Check size={12} />}
+                  <span
+                    style={{
+                      width: '10px',
+                      height: '10px',
+                      borderRadius: '50%',
+                      background: item.enabled
+                        ? 'var(--gray-900)'
+                        : 'var(--gray-500)',
+                    }}
+                  />
                 </span>
               </button>
             ))}
