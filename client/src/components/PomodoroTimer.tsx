@@ -74,12 +74,7 @@ export function PomodoroTimer({
               onValueChange={(val) => onModeChange(val as 'focus' | 'break')}
               className="w-auto"
             >
-              <TabsList
-                className={cn(
-                  'bg-transparent p-0 h-auto gap-8'
-                  // no pill background — like the screenshot
-                )}
-              >
+              <TabsList className={cn('bg-transparent p-0 h-auto gap-8')}>
                 <TabsTrigger
                   value="focus"
                   className={cn(
