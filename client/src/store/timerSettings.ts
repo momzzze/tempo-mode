@@ -14,17 +14,31 @@ interface TimerSettingsState {
   timerStyle: 'classic' | 'halo';
 }
 
+const SETTINGS_KEY = 'tempo-mode-timer-settings';
+
+const loadSettings = (): Partial<TimerSettingsState> => {
+  try {
+    const saved = localStorage.getItem(SETTINGS_KEY);
+    if (!saved) return {};
+    return JSON.parse(saved);
+  } catch {
+    return {};
+  }
+};
+
+const savedSettings = loadSettings();
+
 const initialState: TimerSettingsState = {
-  focusDuration: 25,
-  breakDuration: 5,
-  soundEnabled: false,
-  autoStart: false,
-  hideSeconds: false,
-  notifications: false,
+  focusDuration: savedSettings.focusDuration ?? 25,
+  breakDuration: savedSettings.breakDuration ?? 5,
+  soundEnabled: savedSettings.soundEnabled ?? false,
+  autoStart: savedSettings.autoStart ?? false,
+  hideSeconds: savedSettings.hideSeconds ?? false,
+  notifications: savedSettings.notifications ?? false,
   triggerComplete: 0,
   triggerRestart: 0,
   triggerAddTime: 0,
-  timerStyle: 'classic',
+  timerStyle: savedSettings.timerStyle ?? 'classic',
 };
 
 const timerSettingsSlice = createSlice({

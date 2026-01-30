@@ -20,7 +20,13 @@ import { PomodoroSettings } from '../components/PomodoroSettings';
 import { PomodoroTimer } from '../components/PomodoroTimer';
 import { fetchRandomWorldImage } from '../services/pexelsService';
 import { DraggablePanel } from '../components/DraggablePanel';
+import { SoundscapePlayer } from '../components/SoundscapePlayer';
 import { cn } from '@/lib/utils';
+import {
+  playStartSound,
+  playPauseSound,
+  playCompletionSound,
+} from '../utils/soundUtils';
 
 type TimerMode = 'focus' | 'break';
 
@@ -84,6 +90,7 @@ export default function AppShell() {
   const hideSeconds = timerSettings.hideSeconds;
   const notifications = timerSettings.notifications;
   const timerStyle = timerSettings.timerStyle;
+  const soundEnabled = timerSettings.soundEnabled;
 
   const [mode, setMode] = useState<TimerMode>(savedState?.mode ?? 'focus');
   const [secondsLeft, setSecondsLeft] = useState<number>(
@@ -96,6 +103,19 @@ export default function AppShell() {
     savedState?.totalFocusSec ?? 0
   );
   const intervalRef = useRef<number | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize audio element
+  useEffect(() => {
+    audioRef.current = new Audio('/session-start-end.wav');
+    audioRef.current.preload = 'auto';
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   // Background image state
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
@@ -119,6 +139,17 @@ export default function AppShell() {
     };
     saveTimerState(state);
   }, [mode, secondsLeft, isRunning, task, completed, totalFocusSec]);
+
+  // Auto-continue timer on mode transition if autoStart is enabled
+  useEffect(() => {
+    if (autoStart && !isRunning && secondsLeft > 0) {
+      // Small delay to ensure mode transition is complete
+      const timer = setTimeout(() => {
+        setIsRunning(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [mode, autoStart]);
 
   // Handle timer actions from header menu
   useEffect(() => {
@@ -185,13 +216,15 @@ export default function AppShell() {
       intervalRef.current = window.setInterval(() => {
         setSecondsLeft((prev) => {
           if (prev <= 1) {
-            window.clearInterval(intervalRef.current ?? undefined);
-            intervalRef.current = null;
-
             // Update stats before transition
             setCompleted((c) => c + (mode === 'focus' ? 1 : 0));
             if (mode === 'focus')
               setTotalFocusSec((t) => t + focusDuration * 60);
+
+            // Play sound if enabled
+            if (soundEnabled) {
+              playCompletionSound(audioRef.current);
+            }
 
             // Show notification
             toast.success(
@@ -203,20 +236,16 @@ export default function AppShell() {
               });
             }
 
-            // Auto-transition to next mode
+            // Auto-transition to next mode and set duration
             const nextMode: TimerMode = mode === 'focus' ? 'break' : 'focus';
-            setMode(nextMode);
             const nextDuration =
               nextMode === 'focus' ? focusDuration * 60 : breakDuration * 60;
 
-            // Auto-start if enabled, otherwise just set duration
-            if (autoStart) {
-              setIsRunning(true);
-              return nextDuration;
-            } else {
-              setIsRunning(false);
-              return nextDuration;
-            }
+            // Update mode (this will cause the effect to re-run with new dependencies)
+            setMode(nextMode);
+
+            // Set the next duration and continue if autoStart is true
+            return nextDuration;
           }
           return prev - 1;
         });
@@ -228,7 +257,14 @@ export default function AppShell() {
         intervalRef.current = null;
       }
     };
-  }, [isRunning, mode, focusDuration, breakDuration, notifications, autoStart]);
+  }, [
+    isRunning,
+    mode,
+    focusDuration,
+    breakDuration,
+    notifications,
+    soundEnabled,
+  ]);
 
   const getDuration = (m: TimerMode) => {
     if (m === 'focus') return focusDuration * 60;
@@ -245,10 +281,18 @@ export default function AppShell() {
 
   const handleStart = () => {
     if (isRunning) return;
+    console.log('Start clicked - soundEnabled:', soundEnabled);
+    if (soundEnabled) {
+      playStartSound();
+    }
     setIsRunning(true);
   };
 
   const handlePause = () => {
+    console.log('Pause clicked - soundEnabled:', soundEnabled);
+    if (soundEnabled) {
+      playPauseSound();
+    }
     setIsRunning(false);
     if (intervalRef.current) {
       window.clearInterval(intervalRef.current);
@@ -275,6 +319,12 @@ export default function AppShell() {
 
   const statPanels = useMemo(
     () => [
+      {
+        id: 'soundscape',
+        title: 'Soundscape',
+        content: <SoundscapePlayer />,
+        initial: { x: window.innerWidth - 320, y: 120 },
+      },
       {
         id: 'mode',
         title: 'Mode',

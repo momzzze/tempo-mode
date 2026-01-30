@@ -5,6 +5,7 @@ import userReducer from './user';
 import timerSettingsReducer from './timerSettings';
 
 const PERSIST_KEY = 'tempo-mode-auth';
+const SETTINGS_KEY = 'tempo-mode-timer-settings';
 
 export const store = configureStore({
   reducer: {
@@ -17,11 +18,21 @@ export const store = configureStore({
 store.subscribe(() => {
   const state = store.getState();
   try {
+    // Persist user auth
     if (state.user.user) {
       localStorage.setItem(PERSIST_KEY, JSON.stringify(state.user.user));
     } else {
       localStorage.removeItem(PERSIST_KEY);
     }
+
+    // Persist timer settings
+    const {
+      triggerComplete,
+      triggerRestart,
+      triggerAddTime,
+      ...settingsToPersist
+    } = state.timerSettings;
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settingsToPersist));
   } catch {}
 });
 
