@@ -322,7 +322,7 @@ export default function AppShell() {
       {
         id: 'soundscape',
         title: 'Soundscape',
-        content: <SoundscapePlayer />,
+        content: <SoundscapePlayer timerMode={mode} isRunning={isRunning} />,
         initial: { x: window.innerWidth - 320, y: 120 },
       },
       {
@@ -363,7 +363,7 @@ export default function AppShell() {
         initial: { x: 24, y: 300 },
       },
     ],
-    [mode, completed, totalFocusSec, task]
+    [mode, isRunning, completed, totalFocusSec, task]
   );
 
   return (
@@ -449,6 +449,7 @@ export default function AppShell() {
           id={panel.id}
           title={panel.title}
           initialPosition={panel.initial}
+          hideHeader={panel.id === 'soundscape' ? true : false}
         >
           {panel.content}
         </DraggablePanel>

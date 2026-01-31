@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-type TimerStyle = 'classic';
+type TimerStyle = 'classic' | 'halo';
 
 interface PomodoroSettingsProps {
   onComplete: () => void;
@@ -22,6 +22,7 @@ interface PomodoroSettingsProps {
   onHideSecondsToggle: () => void;
   notifications: boolean;
   onNotificationsToggle: () => void;
+  // Reserved for future timer style switching
   timerStyle?: TimerStyle;
   onStyleChange?: (style: TimerStyle) => void;
   secondsLeft?: number;
@@ -44,11 +45,17 @@ export function PomodoroSettings({
   onHideSecondsToggle,
   notifications,
   onNotificationsToggle,
+
   timerStyle,
+
   onStyleChange,
   secondsLeft = 0,
   totalSeconds = 1,
 }: PomodoroSettingsProps) {
+  // Reserved for future timer style switching
+  void timerStyle;
+  void onStyleChange;
+
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);

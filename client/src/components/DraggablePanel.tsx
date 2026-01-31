@@ -7,6 +7,7 @@ interface DraggablePanelProps {
   children: React.ReactNode;
   initialPosition?: { x: number; y: number };
   className?: string;
+  hideHeader?: boolean;
 }
 
 const storageKey = (id: string) => `draggable-panel-${id}`;
@@ -17,6 +18,7 @@ export function DraggablePanel({
   children,
   initialPosition = { x: 24, y: 140 },
   className,
+  hideHeader = false,
 }: DraggablePanelProps) {
   const [pos, setPos] = useState<{ x: number; y: number }>(initialPosition);
   const dragging = useRef(false);
@@ -111,17 +113,20 @@ export function DraggablePanel({
         ref={panelRef}
         className={cn(
           'cursor-grab active:cursor-grabbing select-none pointer-events-auto',
-          'rounded-xl border border-white/12 bg-black/30 backdrop-blur-md shadow-lg',
+          'rounded-xl bg-black/30 backdrop-blur-md shadow-lg',
           'min-w-[180px] max-w-[260px] text-white/90',
+          !hideHeader && 'border border-white/10',
           className
         )}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
       >
-        <div className="flex justify-center px-3 py-2 text-xs uppercase tracking-[0.12em] text-white/60 border-b border-white/10">
-          {title}
-        </div>
+        {!hideHeader && (
+          <div className="px-4 py-2 border-b border-white/10 font-medium">
+            {title}
+          </div>
+        )}
         <div className="flex justify-center-safe text-sm leading-relaxed">
           {children}
         </div>

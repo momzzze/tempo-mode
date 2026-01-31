@@ -1,0 +1,428 @@
+/* Soundscape Panel Styles */
+
+.sounds-panel {
+  width: 280px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-outer);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sounds-header {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-inner);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sounds-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--gray-200);
+}
+
+.sounds-icon {
+  font-size: 20px;
+  color: var(--neon-400);
+}
+
+.sounds-tabs {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border-inner);
+  flex-wrap: wrap;
+}
+
+.sounds-tab {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  background: transparent;
+  color: var(--gray-400);
+  border: none;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  text-transform: capitalize;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sounds-tab:hover {
+  color: var(--gray-300);
+}
+
+.sounds-tab-active {
+  background: var(--neon-400) !important;
+  color: var(--gray-900) !important;
+  font-weight: 600;
+}
+
+.sounds-tab-now-playing {
+  margin-left: auto;
+  color: var(--neon-400);
+}
+
+.sounds-tab-now-playing:hover {
+  background: rgba(var(--neon-400-rgb), 0.1);
+}
+
+.sounds-empty {
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--gray-400);
+  font-size: var(--font-size-sm);
+}
+
+.sounds-grid {
+  padding: var(--space-2);
+  max-height: 400px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  grid-auto-rows: 1fr;
+}
+
+.soundscape-card-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.soundscape-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  background: var(--surface-2);
+  border: 1px solid var(--border-outer);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  padding: var(--space-2);
+}
+
+.soundscape-card:hover {
+  background: var(--surface-3);
+  border-color: var(--border-inner);
+}
+
+.soundscape-card.active {
+  background: var(--neon-400) / 10;
+  border-color: var(--neon-400);
+}
+
+.soundscape-icon {
+  font-size: 32px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease-out;
+}
+
+.soundscape-name {
+  font-size: var(--font-size-xs);
+  color: var(--gray-300);
+  font-weight: 500;
+  text-align: center;
+}
+
+.soundscape-card.active .soundscape-name {
+  color: var(--neon-400);
+}
+
+.soundscape-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--neon-400);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.2s ease-out;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.soundscape-play-btn:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow: 0 6px 20px rgba(var(--neon-400-rgb), 0.6);
+  background: var(--neon-300);
+}
+
+.soundscape-play-btn:active {
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+/* Now Playing Panel Styles */
+
+.now-playing-panel {
+  width: 320px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-outer);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 600px;
+}
+
+.now-playing-header {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-inner);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.now-playing-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--gray-200);
+}
+
+.now-playing-icon {
+  font-size: 20px;
+}
+
+.now-playing-close {
+  background: transparent;
+  border: none;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease-out;
+}
+
+.now-playing-close:hover {
+  color: var(--gray-300);
+}
+
+.now-playing-controls {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--border-inner);
+  display: flex;
+  gap: var(--space-2);
+}
+
+.play-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background: var(--neon-400);
+  color: var(--gray-900);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  font-size: var(--font-size-sm);
+}
+
+.play-btn:hover {
+  background: var(--neon-300);
+}
+
+.play-btn.pause-btn {
+  background: var(--surface-2);
+  color: var(--gray-200);
+}
+
+.play-btn.pause-btn:hover {
+  background: var(--surface-3);
+}
+
+.now-playing-soundscape {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border-inner);
+}
+
+.now-playing-soundscape h3 {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--gray-200);
+  font-weight: 600;
+}
+
+.tracks-list {
+  padding: var(--space-2);
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.track-item {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.track-toggle {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border-outer);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease-out;
+}
+
+.track-toggle:hover {
+  border-color: var(--border-inner);
+  background: var(--surface-3);
+}
+
+.track-toggle.enabled {
+  background: var(--neon-400) / 10;
+  border-color: var(--neon-400);
+}
+
+.track-toggle.enabled:hover {
+  background: var(--neon-400) / 20;
+}
+
+.track-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.track-icon {
+  font-size: 20px;
+}
+
+.track-controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.track-label {
+  font-size: var(--font-size-xs);
+  color: var(--gray-300);
+  font-weight: 500;
+  margin: 0;
+}
+
+.volume-slider-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.volume-slider {
+  flex: 1;
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--neon-400);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  width: 16px;
+  height: 16px;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--neon-400);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+}
+
+.volume-slider::-moz-range-thumb:hover {
+  width: 16px;
+  height: 16px;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+}
+
+.volume-slider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.volume-value {
+  font-size: var(--font-size-xs);
+  color: var(--gray-400);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* Scrollbar styling */
+.sounds-grid::-webkit-scrollbar,
+.tracks-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sounds-grid::-webkit-scrollbar-track,
+.tracks-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sounds-grid::-webkit-scrollbar-thumb,
+.tracks-list::-webkit-scrollbar-thumb {
+  background: var(--surface-2);
+  border-radius: 3px;
+}
+
+.sounds-grid::-webkit-scrollbar-thumb:hover,
+.tracks-list::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-3);
+}
+
+.spacing {
+  margin: 10px 10px;
+}
