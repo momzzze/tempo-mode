@@ -54,7 +54,7 @@ app.use((_req, res) => {
 
 app.use(errorHandler);
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   logger.info(`Server listening on port ${port}`);
   // Check DB connectivity after server starts
   void checkConnection()
@@ -69,3 +69,21 @@ app.listen(port, () => {
       logger.error({ error }, 'Database connectivity check errored');
     });
 });
+
+// Graceful shutdown handlers
+const gracefulShutdown = (signal: string) => {
+  logger.info(`${signal} received, shutting down gracefully`);
+  server.close(() => {
+    logger.info('Server closed, exiting process');
+    process.exit(0);
+  });
+
+  // Force exit after 10 seconds if graceful shutdown doesn't complete
+  setTimeout(() => {
+    logger.error('Forced exit due to shutdown timeout');
+    process.exit(1);
+  }, 10000);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));

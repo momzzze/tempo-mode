@@ -8,5 +8,7 @@
     "nodeArgs": [
         "--no-warnings"
     ],
-    "inspect": false
+    "inspect": false,
+    "delay": 500,
+    "signal": "SIGTERM"
 }

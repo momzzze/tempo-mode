@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Music2 } from 'lucide-react';
+import { Music } from 'lucide-react';
 import { SoundscapeTabs } from './sounds/SoundscapeTabs';
 import { SoundscapeGrid } from './sounds/SoundscapeGrid';
 import { SoundscapeDetail } from './sounds/SoundscapeDetail';
@@ -31,11 +31,13 @@ const tagElements = [
 export interface SoundscapePlayerProps {
   timerMode?: 'focus' | 'break';
   isRunning?: boolean;
+  onPlayingChange?: (isPlaying: boolean) => void;
 }
 
 export function SoundscapePlayer({
   timerMode = 'focus',
   isRunning = false,
+  onPlayingChange,
 }: SoundscapePlayerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Soundscapes');
@@ -64,7 +66,7 @@ export function SoundscapePlayer({
     }
   }, []);
 
-  // Auto-play soundscape when focus timer starts
+  // Auto-play soundscape when focus timer starts, stop on pause or break
   useEffect(() => {
     console.log(
       '🔔 Timer effect triggered - mode:',
@@ -73,6 +75,14 @@ export function SoundscapePlayer({
       isRunning
     );
 
+    // Stop music when paused or in break mode
+    if (!isRunning || timerMode === 'break') {
+      console.log('⏹️ Stopping audio - paused or break mode');
+      setPlayingElement(null);
+      return;
+    }
+
+    // Auto-play when in focus mode and running
     if (timerMode === 'focus' && isRunning) {
       // Get last played soundscape, or default to Rainfall
       let saved = localStorage.getItem('lastPlayedSoundscape');
@@ -94,10 +104,6 @@ export function SoundscapePlayer({
         console.log('▶️ Setting playingElement to:', element.name);
         setPlayingElement(element);
       }
-    } else if (timerMode === 'break' && isRunning) {
-      // Stop audio when entering break mode
-      console.log('⏹️ Break mode detected, stopping audio');
-      setPlayingElement(null);
     }
   }, [timerMode, isRunning]);
 
@@ -144,7 +150,10 @@ export function SoundscapePlayer({
       rainfallUmbrellaAudio.current.currentTime = 0;
       rainfallAudio.current
         .play()
-        .then(() => console.log('✅ Ambiance playing'))
+        .then(() => {
+          console.log('✅ Ambiance playing');
+          onPlayingChange?.(true);
+        })
         .catch((err) => console.error('❌ Error:', err));
       rainfallUmbrellaAudio.current
         .play()
@@ -154,8 +163,9 @@ export function SoundscapePlayer({
       console.log('⏸️ Pausing');
       rainfallAudio.current.pause();
       rainfallUmbrellaAudio.current.pause();
+      onPlayingChange?.(false);
     }
-  }, [playingElement]);
+  }, [playingElement, onPlayingChange]);
 
   useLayoutEffect(() => {
     if (!isOpen) return;
@@ -189,10 +199,10 @@ export function SoundscapePlayer({
         onClick={() => setIsOpen((prev) => !prev)}
         type="button"
         aria-label="Toggle soundscape modal"
-        className="pointer-events-auto z-50 relative"
+        className="pointer-events-auto z-50 relative flex items-center justify-center"
         ref={triggerRef}
       >
-        <Music2 size={20} />
+        <Music size={20} />
       </button>
 
       {/* Single rainfall audio element */}
@@ -226,50 +236,61 @@ export function SoundscapePlayer({
       />
 
       {isOpen && (
-        <div
-          className={`absolute top-full mt-2 z-20 max-w-[calc(100vw-16px)] ${
-            alignRight ? 'right-0' : 'left-0'
-          }`}
-        >
+        <>
+          {/* Backdrop to capture clicks and close settings menu */}
           <div
-            ref={modalRef}
-            className="w-[560px] h-[500px] max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)] overflow-auto rounded-2xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl flex flex-col"
+            className="fixed inset-0 z-[9999]"
+            onClick={() => setIsOpen(false)}
+            style={{
+              pointerEvents: 'auto',
+              backgroundColor: 'rgba(0, 0, 0, 0)',
+            }}
+          />
+          <div
+            className={`absolute top-full mt-2 z-[10000] max-w-[calc(100vw-16px)] ${
+              alignRight ? 'right-0' : 'left-0'
+            }`}
           >
-            <div className=" menu-tabs flex">
-              <div>{<Music2 size={16} />}</div>
-              <h4>Sounds</h4>
-            </div>
-            {selectedElement ? (
-              <SoundscapeDetail
-                element={selectedElement}
-                onBack={() => setSelectedElement(null)}
-                volumes={
-                  selectedElement.name === 'Rainfall' ? rainfallVolumes : []
-                }
-                onVolumeChange={handleVolumeChange}
-              />
-            ) : (
-              <>
-                <SoundscapeTabs
-                  tabs={tagElements}
-                  activeTab={activeTab}
-                  onTabChange={setActiveTab}
+            <div
+              ref={modalRef}
+              className="w-[560px] h-[500px] max-w-[calc(100vw-16px)] max-h-[calc(100vh-16px)] overflow-auto rounded-2xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="menu-tabs flex items-center px-4 py-3">
+                <Music size={24} />
+              </div>
+              {selectedElement ? (
+                <SoundscapeDetail
+                  element={selectedElement}
+                  onBack={() => setSelectedElement(null)}
+                  volumes={
+                    selectedElement.name === 'Rainfall' ? rainfallVolumes : []
+                  }
+                  onVolumeChange={handleVolumeChange}
                 />
-                <div className="flex-1 overflow-auto p-6">
-                  <SoundscapeGrid
-                    elements={
-                      tagElements.find((tag) => tag.name === activeTab)
-                        ?.elements
-                    }
-                    onSelectElement={setSelectedElement}
-                    playingElement={playingElement}
-                    onPlayToggle={handlePlayToggle}
+              ) : (
+                <>
+                  <SoundscapeTabs
+                    tabs={tagElements}
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
                   />
-                </div>
-              </>
-            )}
+                  <div className="flex-1 overflow-auto p-6">
+                    <SoundscapeGrid
+                      elements={
+                        tagElements.find((tag) => tag.name === activeTab)
+                          ?.elements
+                      }
+                      onSelectElement={setSelectedElement}
+                      playingElement={playingElement}
+                      onPlayToggle={handlePlayToggle}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

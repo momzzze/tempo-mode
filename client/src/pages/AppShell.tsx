@@ -19,7 +19,6 @@ import { toast } from '../components/toast';
 import { PomodoroSettings } from '../components/PomodoroSettings';
 import { PomodoroTimer } from '../components/PomodoroTimer';
 import { fetchRandomWorldImage } from '../services/pexelsService';
-import { DraggablePanel } from '../components/DraggablePanel';
 import { SoundscapePlayer } from '../components/SoundscapePlayer';
 import { cn } from '@/lib/utils';
 import {
@@ -27,6 +26,8 @@ import {
   playPauseSound,
   playCompletionSound,
 } from '../utils/soundUtils';
+import { updateFavicon } from '../utils/dynamicFavicon';
+import { Coffee, CheckCircle, Clock, FileText } from 'lucide-react';
 
 type TimerMode = 'focus' | 'break';
 
@@ -102,6 +103,7 @@ export default function AppShell() {
   const [totalFocusSec, setTotalFocusSec] = useState(
     savedState?.totalFocusSec ?? 0
   );
+  const [soundscapePlaying, setSoundscapePlaying] = useState(false);
   const intervalRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -139,6 +141,16 @@ export default function AppShell() {
     };
     saveTimerState(state);
   }, [mode, secondsLeft, isRunning, task, completed, totalFocusSec]);
+
+  // Update favicon based on timer state
+  useEffect(() => {
+    updateFavicon({
+      isRunning,
+      secondsLeft,
+      mode,
+      soundPlaying: soundscapePlaying,
+    });
+  }, [isRunning, secondsLeft, mode, soundscapePlaying]);
 
   // Auto-continue timer on mode transition if autoStart is enabled
   useEffect(() => {
@@ -317,143 +329,129 @@ export default function AppShell() {
   const showBackground =
     (layer === 'fog' || variant === 'halo') && !!backgroundUrl;
 
-  const statPanels = useMemo(
-    () => [
-      {
-        id: 'soundscape',
-        title: 'Soundscape',
-        content: <SoundscapePlayer timerMode={mode} isRunning={isRunning} />,
-        initial: { x: window.innerWidth - 320, y: 120 },
-      },
-      {
-        id: 'mode',
-        title: 'Mode',
-        content: mode === 'focus' ? 'Focus' : 'Break',
-        initial: { x: 24, y: 120 },
-      },
-      {
-        id: 'completed',
-        title: 'Completed',
-        content: `${completed} sessions`,
-        initial: { x: 220, y: 120 },
-      },
-      {
-        id: 'focus-time',
-        title: 'Focus Time',
-        content: `${Math.floor(totalFocusSec / 60)} mins focused`,
-        initial: { x: 416, y: 120 },
-      },
-      {
-        id: 'task',
-        title: 'Task',
-        content: task || 'Not set',
-        initial: { x: 612, y: 120 },
-      },
-      {
-        id: 'session-log',
-        title: 'Session Log',
-        content: (
-          <ul className="space-y-1 text-white/80 list-disc list-inside">
-            <li>Stay focused. One session at a time.</li>
-            <li>Hover over timer for settings (⋮).</li>
-            <li>Switch modes for breaks.</li>
-            <li>Set task to track your intent.</li>
-          </ul>
-        ),
-        initial: { x: 24, y: 300 },
-      },
-    ],
-    [mode, isRunning, completed, totalFocusSec, task]
-  );
-
   return (
-    <div className={cn('relative text-white overflow-y-auto')}>
-      {showBackground && (
-        <div className="fixed inset-0 -z-10 opacity-100 transition-opacity duration-500">
-          <img
-            src={backgroundUrl ?? ''}
-            alt="Background"
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/75" />
+    <div className="flex flex-col">
+      {/* Stats bar - absolute positioned, centered like header wrapper */}
+      <div className="absolute top-16 left-1/2 -translate-x-1/2 flex gap-12 text-white text-base z-30">
+        {/* Mode */}
+        <div className="flex flex-col items-center gap-1 cursor-default">
+          {mode === 'focus' ? (
+            <span className="text-2xl">🎯</span>
+          ) : (
+            <Coffee size={24} />
+          )}
+          <span className="text-sm font-medium">
+            {mode === 'focus' ? 'Focus' : 'Break'}
+          </span>
         </div>
-      )}
 
-      <div
-        className={
-          variant === 'halo'
-            ? 'flex flex-col items-center justify-center gap-8 px-6 py-10'
-            : 'px-6 py-10'
-        }
-      >
+        {/* Completed */}
+        <div className="flex flex-col items-center gap-1 cursor-default">
+          <CheckCircle size={24} />
+          <span className="text-sm font-medium">{completed}</span>
+        </div>
+
+        {/* Total Time */}
+        <div className="flex flex-col items-center gap-1 cursor-default">
+          <Clock size={24} />
+          <span className="text-sm font-medium">
+            {Math.floor(totalFocusSec / 60)}m
+          </span>
+        </div>
+
+        {/* Task */}
+        {task && (
+          <div className="flex flex-col items-center gap-1 cursor-default max-w-xs">
+            <FileText size={24} />
+            <span className="truncate text-sm font-medium">{task}</span>
+          </div>
+        )}
+
+        {/* Music Player */}
+        <div className="flex flex-col items-center gap-1 cursor-default">
+          <SoundscapePlayer
+            timerMode={mode}
+            isRunning={isRunning}
+            onPlayingChange={setSoundscapePlaying}
+          />
+          <span className="text-sm font-medium">Sounds</span>
+        </div>
+      </div>
+      <div className={cn('relative text-white overflow-y-auto')}>
+        {showBackground && (
+          <div className="fixed inset-0 -z-10 opacity-100 transition-opacity duration-500">
+            <img
+              src={backgroundUrl ?? ''}
+              alt="Background"
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/75" />
+          </div>
+        )}
+
         <div
           className={
-            variant === 'minimal'
-              ? 'grid gap-6 lg:grid-cols-[1fr,320px]'
-              : 'w-full flex flex-col items-center'
+            variant === 'halo'
+              ? 'flex flex-col items-center justify-center gap-8 px-6 py-10'
+              : 'px-6 py-10'
           }
         >
-          <div className="flex flex-col items-center overflow-visible">
-            <PomodoroTimer
-              mode={mode}
-              onModeChange={(next) => switchMode(next)}
-              timeDisplay={formatted}
-              isRunning={isRunning}
-              onStart={handleStart}
-              onPause={handlePause}
-              task={task}
-              onTaskChange={setTask}
-              variant={variant}
-              settingsSlot={
-                <PomodoroSettings
-                  onComplete={() => dispatch(completeTimer())}
-                  onRestart={() => dispatch(restartTimer())}
-                  onAddTime={() => dispatch(addTimeToTimer())}
-                  focusDuration={timerSettings.focusDuration}
-                  breakDuration={timerSettings.breakDuration}
-                  onFocusChange={(mins) => dispatch(setFocusDuration(mins))}
-                  onBreakChange={(mins) => dispatch(setBreakDuration(mins))}
-                  soundEnabled={timerSettings.soundEnabled}
-                  onSoundToggle={() => dispatch(toggleSound())}
-                  autoStart={timerSettings.autoStart}
-                  onAutoStartToggle={() => dispatch(toggleAutoStart())}
-                  hideSeconds={timerSettings.hideSeconds}
-                  onHideSecondsToggle={() => dispatch(toggleHideSeconds())}
-                  notifications={timerSettings.notifications}
-                  onNotificationsToggle={() => {
-                    if (
-                      !timerSettings.notifications &&
-                      'Notification' in window
-                    ) {
-                      Notification.requestPermission();
+          <div
+            className={
+              variant === 'halo'
+                ? 'flex flex-col items-center justify-center gap-8 px-6 py-10'
+                : 'px-6 py-10'
+            }
+          >
+            <div className="flex flex-col items-center overflow-visible">
+              <PomodoroTimer
+                mode={mode}
+                onModeChange={(next) => switchMode(next)}
+                timeDisplay={formatted}
+                isRunning={isRunning}
+                onStart={handleStart}
+                onPause={handlePause}
+                task={task}
+                onTaskChange={setTask}
+                variant={variant}
+                settingsSlot={
+                  <PomodoroSettings
+                    onComplete={() => dispatch(completeTimer())}
+                    onRestart={() => dispatch(restartTimer())}
+                    onAddTime={() => dispatch(addTimeToTimer())}
+                    focusDuration={timerSettings.focusDuration}
+                    breakDuration={timerSettings.breakDuration}
+                    onFocusChange={(mins) => dispatch(setFocusDuration(mins))}
+                    onBreakChange={(mins) => dispatch(setBreakDuration(mins))}
+                    soundEnabled={timerSettings.soundEnabled}
+                    onSoundToggle={() => dispatch(toggleSound())}
+                    autoStart={timerSettings.autoStart}
+                    onAutoStartToggle={() => dispatch(toggleAutoStart())}
+                    hideSeconds={timerSettings.hideSeconds}
+                    onHideSecondsToggle={() => dispatch(toggleHideSeconds())}
+                    notifications={timerSettings.notifications}
+                    onNotificationsToggle={() => {
+                      if (
+                        !timerSettings.notifications &&
+                        'Notification' in window
+                      ) {
+                        Notification.requestPermission();
+                      }
+                      dispatch(toggleNotifications());
+                    }}
+                    timerStyle={timerStyle}
+                    onStyleChange={(style) => dispatch(setTimerStyle(style))}
+                    secondsLeft={secondsLeft}
+                    totalSeconds={
+                      mode === 'focus' ? focusDuration * 60 : breakDuration * 60
                     }
-                    dispatch(toggleNotifications());
-                  }}
-                  timerStyle={timerStyle}
-                  onStyleChange={(style) => dispatch(setTimerStyle(style))}
-                  secondsLeft={secondsLeft}
-                  totalSeconds={
-                    mode === 'focus' ? focusDuration * 60 : breakDuration * 60
-                  }
-                />
-              }
-            />
+                  />
+                }
+              />
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Floating draggable panels */}
-      {statPanels.map((panel) => (
-        <DraggablePanel
-          key={panel.id}
-          id={panel.id}
-          title={panel.title}
-          initialPosition={panel.initial}
-          hideHeader={panel.id === 'soundscape' ? true : false}
-        >
-          {panel.content}
-        </DraggablePanel>
-      ))}
     </div>
   );
 }

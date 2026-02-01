@@ -39,6 +39,7 @@ export function PomodoroTimer({
   settingsSlot,
 }: PomodoroTimerProps) {
   const isHalo = variant === 'halo';
+  const [isHovered, setIsHovered] = React.useState(false);
 
   return (
     <Timer
@@ -49,12 +50,19 @@ export function PomodoroTimer({
         'overflow-visible',
         isHalo && 'text-white'
       )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <TimerHeader
-        className={cn(isHalo && 'absolute top-6 right-6', 'z-[150]')}
-      >
-        {settingsSlot}
-      </TimerHeader>
+      {isHovered && (
+        <TimerHeader
+          className={cn(
+            isHalo && 'absolute top-16 right-6',
+            'z-[150] transition-opacity duration-200'
+          )}
+        >
+          {settingsSlot}
+        </TimerHeader>
+      )}
 
       <div
         className={cn(
