@@ -80,7 +80,7 @@ export function PomodoroTimer({
     >
       <div
         className={cn(
-          'relative w-[min(84vw,520px)] aspect-square grid place-items-center',
+          'relative w-[min(84vw,490px)] aspect-square grid place-items-center',
           isHalo && 'select-none'
         )}
       >
@@ -96,29 +96,35 @@ export function PomodoroTimer({
               onValueChange={(val) => onModeChange(val as 'focus' | 'break')}
               className="w-auto"
             >
-              <TabsList className={cn('bg-transparent p-0 h-auto gap-8')}>
-                <TabsTrigger
-                  value="focus"
-                  className={cn(
-                    'p-0 h-auto bg-transparent shadow-none rounded-none',
-                    'uppercase tracking-widest text-sm font-semibold',
-                    'text-white/60 data-[state=active]:text-white',
-                    'data-[state=active]:underline underline-offset-[10px] decoration-white/60'
-                  )}
-                >
-                  Focus
-                </TabsTrigger>
-                <TabsTrigger
-                  value="break"
-                  className={cn(
-                    'p-0 h-auto bg-transparent shadow-none rounded-none',
-                    'uppercase tracking-widest text-sm font-semibold',
-                    'text-white/60 data-[state=active]:text-white',
-                    'data-[state=active]:underline underline-offset-[10px] decoration-white/60'
-                  )}
-                >
-                  Break
-                </TabsTrigger>
+              <TabsList className="pomodoro-timer__tabs-list bg-transparent p-0 h-auto gap-8">
+                <div className="flex gap-10 relative">
+                  <div>
+                    <TabsTrigger
+                      value="focus"
+                      className={cn(
+                        'p-0 h-auto bg-transparent shadow-none rounded-none',
+                        'uppercase tracking-widest text-sm font-semibold',
+                        'text-white/60 data-[state=active]:text-white',
+                        'data-[state=active]:underline underline-offset-[10px] decoration-white/60'
+                      )}
+                    >
+                      Focus
+                    </TabsTrigger>
+                  </div>
+                  <div>
+                    <TabsTrigger
+                      value="break"
+                      className={cn(
+                        'p-0 h-auto bg-transparent shadow-none rounded-none',
+                        'uppercase tracking-widest text-sm font-semibold',
+                        'text-white/60 data-[state=active]:text-white',
+                        'data-[state=active]:underline underline-offset-[10px] decoration-white/60'
+                      )}
+                    >
+                      Break
+                    </TabsTrigger>
+                  </div>
+                </div>
               </TabsList>
             </Tabs>
           </TimerModeSelector>
@@ -140,7 +146,7 @@ export function PomodoroTimer({
             >
               {timeDisplay}
             </TimerDigits>
-            {settingsSlot && isClockHovered && (
+            {settingsSlot && (
               <div className="pomodoro-timer__settings">{settingsSlot}</div>
             )}
           </div>

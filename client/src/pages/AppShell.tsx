@@ -356,7 +356,7 @@ export default function AppShell() {
   return (
     <div className="flex flex-col">
       {/* Stats bar */}
-      <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 stats-bar">
+      <div className="absolute top-16 left-0 right-0 z-30 stats-bar">
         {/* Mode */}
         <div className="stats-item">
           <div className="stats-item__icon">
@@ -413,85 +413,73 @@ export default function AppShell() {
           <div className="stats-item__label">Sounds</div>
         </div>
       </div>
-      <div className={cn('relative text-white overflow-y-auto')}>
+      <div className={cn('relative text-white overflow-hidden')}>
         {showBackground && (
           <div className="fixed inset-0 -z-10 opacity-100 transition-opacity duration-500">
             <img
-                  soundscapeOpen ? null : (
-                    <PomodoroSettings
-                      onComplete={() => dispatch(completeTimer())}
-                      onRestart={() => dispatch(restartTimer())}
-                      onAddTime={() => dispatch(addTimeToTimer())}
-                      focusDuration={timerSettings.focusDuration}
-                      breakDuration={timerSettings.breakDuration}
-                      onFocusChange={(mins) => dispatch(setFocusDuration(mins))}
-                      onBreakChange={(mins) => dispatch(setBreakDuration(mins))}
-                      soundEnabled={timerSettings.soundEnabled}
-                      onSoundToggle={() => dispatch(toggleSound())}
-                      autoStart={timerSettings.autoStart}
-                      onAutoStartToggle={() => dispatch(toggleAutoStart())}
-                      hideSeconds={timerSettings.hideSeconds}
-                      onHideSecondsToggle={() => dispatch(toggleHideSeconds())}
-                      notifications={timerSettings.notifications}
-                      onNotificationsToggle={() => {
-                        if (
-                          !timerSettings.notifications &&
-                          'Notification' in window
-                        ) {
-                          Notification.requestPermission();
-                        }
-                        dispatch(toggleNotifications());
-                      }}
-                      timerStyle={timerStyle}
-                      onStyleChange={(style) => dispatch(setTimerStyle(style))}
-                      secondsLeft={secondsLeft}
-                      totalSeconds={
-                        mode === 'focus'
-                          ? focusDuration * 60
-                          : breakDuration * 60
-                      }
-                    />
-                  )
-                secondsLeft={secondsLeft}
-                totalSeconds={
-                  mode === 'focus' ? focusDuration * 60 : breakDuration * 60
-                }
-                settingsSlot={
-                  <PomodoroSettings
-                    onComplete={() => dispatch(completeTimer())}
-                    onRestart={() => dispatch(restartTimer())}
-                    onAddTime={() => dispatch(addTimeToTimer())}
-                    focusDuration={timerSettings.focusDuration}
-                    breakDuration={timerSettings.breakDuration}
-                    onFocusChange={(mins) => dispatch(setFocusDuration(mins))}
-                    onBreakChange={(mins) => dispatch(setBreakDuration(mins))}
-                    soundEnabled={timerSettings.soundEnabled}
-                    onSoundToggle={() => dispatch(toggleSound())}
-                    autoStart={timerSettings.autoStart}
-                    onAutoStartToggle={() => dispatch(toggleAutoStart())}
-                    hideSeconds={timerSettings.hideSeconds}
-                    onHideSecondsToggle={() => dispatch(toggleHideSeconds())}
-                    notifications={timerSettings.notifications}
-                    onNotificationsToggle={() => {
-                      if (
-                        !timerSettings.notifications &&
-                        'Notification' in window
-                      ) {
-                        Notification.requestPermission();
-                      }
-                      dispatch(toggleNotifications());
-                    }}
-                    timerStyle={timerStyle}
-                    onStyleChange={(style) => dispatch(setTimerStyle(style))}
-                    secondsLeft={secondsLeft}
-                    totalSeconds={
-                      mode === 'focus' ? focusDuration * 60 : breakDuration * 60
-                    }
-                  />
-                }
-              />
-            </div>
+              src={backgroundUrl}
+              alt="Background"
+              className="w-full h-full object-cover"
+            />
           </div>
+        )}
+        <div className="flex items-center justify-center min-h-screen">
+          <PomodoroTimer
+            mode={mode}
+            onModeChange={switchMode}
+            timeDisplay={formatted}
+            isRunning={isRunning}
+            onStart={handleStart}
+            onPause={handlePause}
+            task={activeTask}
+            onTaskChange={(newTask) => {
+              if (tasks.length > 0) {
+                addTask(newTask);
+              } else {
+                addTask(newTask);
+              }
+            }}
+            variant={variant}
+            secondsLeft={secondsLeft}
+            totalSeconds={
+              mode === 'focus' ? focusDuration * 60 : breakDuration * 60
+            }
+            settingsSlot={
+              soundscapeOpen ? null : (
+                <PomodoroSettings
+                  onComplete={() => dispatch(completeTimer())}
+                  onRestart={() => dispatch(restartTimer())}
+                  onAddTime={() => dispatch(addTimeToTimer())}
+                  focusDuration={timerSettings.focusDuration}
+                  breakDuration={timerSettings.breakDuration}
+                  onFocusChange={(mins) => dispatch(setFocusDuration(mins))}
+                  onBreakChange={(mins) => dispatch(setBreakDuration(mins))}
+                  soundEnabled={timerSettings.soundEnabled}
+                  onSoundToggle={() => dispatch(toggleSound())}
+                  autoStart={timerSettings.autoStart}
+                  onAutoStartToggle={() => dispatch(toggleAutoStart())}
+                  hideSeconds={timerSettings.hideSeconds}
+                  onHideSecondsToggle={() => dispatch(toggleHideSeconds())}
+                  notifications={timerSettings.notifications}
+                  onNotificationsToggle={() => {
+                    if (
+                      !timerSettings.notifications &&
+                      'Notification' in window
+                    ) {
+                      Notification.requestPermission();
+                    }
+                    dispatch(toggleNotifications());
+                  }}
+                  timerStyle={timerStyle}
+                  onStyleChange={(style) => dispatch(setTimerStyle(style))}
+                  secondsLeft={secondsLeft}
+                  totalSeconds={
+                    mode === 'focus' ? focusDuration * 60 : breakDuration * 60
+                  }
+                />
+              )
+            }
+          />
         </div>
       </div>
     </div>

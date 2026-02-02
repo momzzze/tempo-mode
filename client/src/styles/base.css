@@ -8,6 +8,8 @@
 
 html {
   color-scheme: var(--color-scheme);
+  overflow: hidden;
+  scrollbar-width: none;
 }
 
 body {
@@ -17,6 +19,13 @@ body {
   color: var(--text-1);
   font-size: var(--font-size-md);
   line-height: var(--line-normal);
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
 }
 
 /* Ensure the shell and background layers can always fill the viewport */

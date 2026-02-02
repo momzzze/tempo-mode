@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,20 +59,59 @@ export function PomodoroSettings({
   void onStyleChange;
 
   const [isOpen, setIsOpen] = useState(false);
-  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
+  const [menuPos, setMenuPos] = useState<{
+    top?: number;
+    bottom?: number;
+    left?: number;
+  }>({});
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const handleMenuToggle = () => {
     if (!isOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      setMenuPos({
-        top: rect.bottom + 4,
-        right: window.innerWidth - rect.right,
-      });
+      const menuHeight = 400; // Approximate menu height
+      const menuWidth = 280;
+
+      const positioning: {
+        top?: number;
+        bottom?: number;
+        left?: number;
+        right?: number;
+      } = {};
+
+      // Position to the right of the button
+      const rightPos = window.innerWidth - rect.right + 38; // 8px gap from button
+
+      // Check if menu would go off right edge, adjust left if needed
+      if (window.innerWidth - rect.right + 8 + menuWidth > window.innerWidth) {
+        positioning.left = rect.left - menuWidth - 8; // Position to the left instead
+      } else {
+        positioning.right = rightPos;
+      }
+
+      // Position slightly above the button (vertically centered to button area)
+      positioning.top = rect.top - 50; // Slightly above the button
+
+      setMenuPos(positioning);
     }
     setIsOpen(!isOpen);
   };
+
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = originalOverflow || 'auto';
+    }
+
+    return () => {
+      document.body.style.overflow = originalOverflow || 'auto';
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -86,7 +126,7 @@ export function PomodoroSettings({
   }, [isOpen]);
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div ref={menuRef}>
       <Button
         ref={triggerRef}
         variant="ghost"
@@ -98,130 +138,141 @@ export function PomodoroSettings({
         <MoreVertical size={20} />
       </Button>
 
-      {isOpen && (
-        <div
-          className="pomodoro-settings__menu"
-          style={{
-            top: `${menuPos.top}px`,
-            right: `${menuPos.right}px`,
-          }}
-        >
-          <div className="pomodoro-settings__section-title">Session Menu</div>
+      {isOpen &&
+        createPortal(
+          <div
+            className="pomodoro-settings__menu"
+            style={{
+              top: menuPos.top !== undefined ? `${menuPos.top}px` : 'auto',
+              bottom:
+                menuPos.bottom !== undefined ? `${menuPos.bottom}px` : 'auto',
+              left: menuPos.left !== undefined ? `${menuPos.left}px` : 'auto',
+              right:
+                menuPos.right !== undefined ? `${menuPos.right}px` : 'auto',
+            }}
+            ref={menuRef}
+          >
+            <div className="pomodoro-settings__section-title">Session Menu</div>
 
-          <div className="pomodoro-settings__actions">
-            <button
-              className="pomodoro-settings__button"
-              onClick={() => {
-                onComplete();
-                setIsOpen(false);
-              }}
-            >
-              Complete timer
-            </button>
-            <button
-              className="pomodoro-settings__button"
-              onClick={() => {
-                onRestart();
-                setIsOpen(false);
-              }}
-            >
-              Restart timer
-            </button>
-            <button
-              className="pomodoro-settings__button"
-              onClick={() => {
-                onAddTime();
-                setIsOpen(false);
-              }}
-            >
-              + Add 10 minutes
-            </button>
-          </div>
-
-          <div className="pomodoro-settings__divider" />
-
-          <div className="pomodoro-settings__durations">
-            <div className="pomodoro-settings__duration-row">
-              <Label className="pomodoro-settings__duration-label">Focus</Label>
-              <Input
-                type="number"
-                min={1}
-                max={120}
-                value={focusDuration}
-                onChange={(e) => onFocusChange(Number(e.target.value))}
-                className="pomodoro-settings__duration-input"
-              />
-              <span className="pomodoro-settings__duration-unit">min</span>
-            </div>
-
-            <div className="pomodoro-settings__duration-row">
-              <Label className="pomodoro-settings__duration-label">Break</Label>
-              <Input
-                type="number"
-                min={1}
-                max={60}
-                value={breakDuration}
-                onChange={(e) => onBreakChange(Number(e.target.value))}
-                className="pomodoro-settings__duration-input"
-              />
-              <span className="pomodoro-settings__duration-unit">min</span>
-            </div>
-          </div>
-
-          <div className="pomodoro-settings__divider" />
-
-          <div className="pomodoro-settings__toggles">
-            {[
-              {
-                label: 'Timer sound effects',
-                enabled: soundEnabled,
-                onToggle: onSoundToggle,
-              },
-              {
-                label: 'Auto-start timers',
-                enabled: autoStart,
-                onToggle: onAutoStartToggle,
-              },
-              {
-                label: 'Hide seconds',
-                enabled: hideSeconds,
-                onToggle: onHideSecondsToggle,
-              },
-              {
-                label: 'Browser notifications',
-                enabled: notifications,
-                onToggle: onNotificationsToggle,
-              },
-            ].map((item) => (
+            <div className="pomodoro-settings__actions">
               <button
-                key={item.label}
-                className="pomodoro-settings__toggle-button"
+                className="pomodoro-settings__button"
                 onClick={() => {
-                  item.onToggle();
+                  onComplete();
+                  setIsOpen(false);
                 }}
-                aria-pressed={item.enabled}
               >
-                <span>{item.label}</span>
-                <span
-                  className={`pomodoro-settings__toggle-switch ${
-                    item.enabled
-                      ? 'pomodoro-settings__toggle-switch--active'
-                      : 'pomodoro-settings__toggle-switch--inactive'
-                  }`}
-                >
-                  <span
-                    className={`pomodoro-settings__toggle-knob ${
-                      item.enabled
-                        ? 'pomodoro-settings__toggle-knob--active'
-                        : 'pomodoro-settings__toggle-knob--inactive'
-                    }`}
-                  />
-                </span>
+                Complete timer
               </button>
-            ))}
-          </div>
-        </div>
-      )}
+              <button
+                className="pomodoro-settings__button"
+                onClick={() => {
+                  onRestart();
+                  setIsOpen(false);
+                }}
+              >
+                Restart timer
+              </button>
+              <button
+                className="pomodoro-settings__button"
+                onClick={() => {
+                  onAddTime();
+                  setIsOpen(false);
+                }}
+              >
+                + Add 10 minutes
+              </button>
+            </div>
+
+            <div className="pomodoro-settings__divider" />
+
+            <div className="pomodoro-settings__durations">
+              <div className="pomodoro-settings__duration-row">
+                <Label className="pomodoro-settings__duration-label">
+                  Focus
+                </Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={120}
+                  value={focusDuration}
+                  onChange={(e) => onFocusChange(Number(e.target.value))}
+                  className="pomodoro-settings__duration-input"
+                />
+                <span className="pomodoro-settings__duration-unit">min</span>
+              </div>
+
+              <div className="pomodoro-settings__duration-row">
+                <Label className="pomodoro-settings__duration-label">
+                  Break
+                </Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={60}
+                  value={breakDuration}
+                  onChange={(e) => onBreakChange(Number(e.target.value))}
+                  className="pomodoro-settings__duration-input"
+                />
+                <span className="pomodoro-settings__duration-unit">min</span>
+              </div>
+            </div>
+
+            <div className="pomodoro-settings__divider" />
+
+            <div className="pomodoro-settings__toggles">
+              {[
+                {
+                  label: 'Timer sound effects',
+                  enabled: soundEnabled,
+                  onToggle: onSoundToggle,
+                },
+                {
+                  label: 'Auto-start timers',
+                  enabled: autoStart,
+                  onToggle: onAutoStartToggle,
+                },
+                {
+                  label: 'Hide seconds',
+                  enabled: hideSeconds,
+                  onToggle: onHideSecondsToggle,
+                },
+                {
+                  label: 'Browser notifications',
+                  enabled: notifications,
+                  onToggle: onNotificationsToggle,
+                },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  className="pomodoro-settings__toggle-button"
+                  onClick={() => {
+                    item.onToggle();
+                  }}
+                  aria-pressed={item.enabled}
+                >
+                  <span>{item.label}</span>
+                  <span
+                    className={`pomodoro-settings__toggle-switch ${
+                      item.enabled
+                        ? 'pomodoro-settings__toggle-switch--active'
+                        : 'pomodoro-settings__toggle-switch--inactive'
+                    }`}
+                  >
+                    <span
+                      className={`pomodoro-settings__toggle-knob ${
+                        item.enabled
+                          ? 'pomodoro-settings__toggle-knob--active'
+                          : 'pomodoro-settings__toggle-knob--inactive'
+                      }`}
+                    />
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
