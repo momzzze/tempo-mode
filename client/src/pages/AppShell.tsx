@@ -20,6 +20,8 @@ import { PomodoroSettings } from '../components/PomodoroSettings';
 import { PomodoroTimer } from '../components/PomodoroTimer';
 import { fetchRandomWorldImage } from '../services/pexelsService';
 import { SoundscapePlayer } from '../components/SoundscapePlayer';
+import { TaskPanel } from '../components/TaskPanel';
+import { useTask } from '../hooks/useTask';
 import { cn } from '@/lib/utils';
 import {
   playStartSound,
@@ -27,7 +29,8 @@ import {
   playCompletionSound,
 } from '../utils/soundUtils';
 import { updateFavicon } from '../utils/dynamicFavicon';
-import { Coffee, CheckCircle, Clock, FileText } from 'lucide-react';
+import { Coffee, CheckCircle, Clock } from 'lucide-react';
+import './AppShell.css';
 
 type TimerMode = 'focus' | 'break';
 
@@ -98,7 +101,6 @@ export default function AppShell() {
     savedState?.secondsLeft ?? focusDuration * 60
   );
   const [isRunning, setIsRunning] = useState(savedState?.isRunning ?? false);
-  const [task, setTask] = useState(savedState?.task ?? '');
   const [completed, setCompleted] = useState(savedState?.completed ?? 0);
   const [totalFocusSec, setTotalFocusSec] = useState(
     savedState?.totalFocusSec ?? 0
@@ -106,6 +108,14 @@ export default function AppShell() {
   const [soundscapePlaying, setSoundscapePlaying] = useState(false);
   const intervalRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const {
+    tasks,
+    activeTask,
+    activeIndex,
+    setActiveIndex,
+    addTask,
+    removeTask,
+  } = useTask();
 
   // Initialize audio element
   useEffect(() => {
@@ -134,13 +144,20 @@ export default function AppShell() {
       mode,
       secondsLeft,
       isRunning,
-      task,
+      task: activeTask,
       completed,
       totalFocusSec,
       timestamp: Date.now(),
     };
     saveTimerState(state);
-  }, [mode, secondsLeft, isRunning, task, completed, totalFocusSec]);
+  }, [mode, secondsLeft, isRunning, activeTask, completed, totalFocusSec]);
+
+  // Load saved task if no tasks exist
+  useEffect(() => {
+    if (tasks.length === 0 && savedState?.task) {
+      addTask(savedState.task);
+    }
+  }, []);
 
   // Update favicon based on timer state
   useEffect(() => {
@@ -253,6 +270,12 @@ export default function AppShell() {
             const nextDuration =
               nextMode === 'focus' ? focusDuration * 60 : breakDuration * 60;
 
+            // If focus session completed and there are tasks, move to next task
+            if (mode === 'focus' && tasks.length > 0) {
+              const nextTaskIndex = (activeIndex + 1) % tasks.length;
+              setActiveIndex(nextTaskIndex);
+            }
+
             // Update mode (this will cause the effect to re-run with new dependencies)
             setMode(nextMode);
 
@@ -331,50 +354,61 @@ export default function AppShell() {
 
   return (
     <div className="flex flex-col">
-      {/* Stats bar - absolute positioned, centered like header wrapper */}
-      <div className="absolute top-16 left-1/2 -translate-x-1/2 flex gap-12 text-white text-base z-30">
+      {/* Stats bar */}
+      <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 stats-bar">
         {/* Mode */}
-        <div className="flex flex-col items-center gap-1 cursor-default">
-          {mode === 'focus' ? (
-            <span className="text-2xl">🎯</span>
-          ) : (
-            <Coffee size={24} />
-          )}
-          <span className="text-sm font-medium">
+        <div className="stats-item">
+          <div className="stats-item__icon">
+            {mode === 'focus' ? (
+              <span className="text-2xl">🎯</span>
+            ) : (
+              <Coffee size={24} />
+            )}
+          </div>
+          <div className="stats-item__label">
             {mode === 'focus' ? 'Focus' : 'Break'}
-          </span>
+          </div>
         </div>
 
         {/* Completed */}
-        <div className="flex flex-col items-center gap-1 cursor-default">
-          <CheckCircle size={24} />
-          <span className="text-sm font-medium">{completed}</span>
+        <div className="stats-item">
+          <div className="stats-item__icon">
+            <CheckCircle size={24} />
+          </div>
+          <div className="stats-item__label">{completed}</div>
         </div>
 
         {/* Total Time */}
-        <div className="flex flex-col items-center gap-1 cursor-default">
-          <Clock size={24} />
-          <span className="text-sm font-medium">
+        <div className="stats-item">
+          <div className="stats-item__icon">
+            <Clock size={24} />
+          </div>
+          <div className="stats-item__label">
             {Math.floor(totalFocusSec / 60)}m
-          </span>
+          </div>
         </div>
 
-        {/* Task */}
-        {task && (
-          <div className="flex flex-col items-center gap-1 cursor-default max-w-xs">
-            <FileText size={24} />
-            <span className="truncate text-sm font-medium">{task}</span>
-          </div>
-        )}
+        {/* Task Panel */}
+        <div className="stats-item">
+          <TaskPanel
+            tasks={tasks}
+            activeIndex={activeIndex}
+            onAddTask={addTask}
+            onRemoveTask={removeTask}
+            onSetActiveTask={setActiveIndex}
+            showLabel={false}
+          />
+          <div className="stats-item__label">{activeTask || 'Task'}</div>
+        </div>
 
         {/* Music Player */}
-        <div className="flex flex-col items-center gap-1 cursor-default">
+        <div className="stats-item">
           <SoundscapePlayer
             timerMode={mode}
             isRunning={isRunning}
             onPlayingChange={setSoundscapePlaying}
           />
-          <span className="text-sm font-medium">Sounds</span>
+          <div className="stats-item__label">Sounds</div>
         </div>
       </div>
       <div className={cn('relative text-white overflow-y-auto')}>
@@ -411,8 +445,8 @@ export default function AppShell() {
                 isRunning={isRunning}
                 onStart={handleStart}
                 onPause={handlePause}
-                task={task}
-                onTaskChange={setTask}
+                task={activeTask}
+                onTaskChange={() => {}}
                 variant={variant}
                 settingsSlot={
                   <PomodoroSettings

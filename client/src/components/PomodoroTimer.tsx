@@ -128,7 +128,6 @@ export function PomodoroTimer({
             className="absolute bottom-[24%] left-1/2 -translate-x-1/2 w-[86%]"
           >
             <Label
-              htmlFor="task"
               className={cn(
                 'block text-center',
                 'text-white/85',
@@ -139,20 +138,20 @@ export function PomodoroTimer({
               I will focus on…
             </Label>
 
-            {/* Optional: keep input but make it invisible/clean like the screenshot */}
-            <Input
-              id="task"
-              value={task}
-              onChange={(e) => onTaskChange(e.target.value)}
-              placeholder=""
-              className={cn(
-                'mt-3',
-                'bg-transparent border-0 border-b border-white/25 rounded-none',
-                'text-center text-white/90 font-mono',
-                'focus-visible:ring-0 focus-visible:border-white/45',
-                'placeholder:text-white/40'
-              )}
-            />
+            {/* Task display */}
+            {task && (
+              <div
+                className={cn(
+                  'mt-3',
+                  'text-center',
+                  'text-white/90 font-mono text-[clamp(16px,2.8vw,24px)]',
+                  'tracking-wide',
+                  'border-b border-white/25 pb-2'
+                )}
+              >
+                {task}
+              </div>
+            )}
           </TimerTaskInput>
 
           {/* Round control button like screenshot */}

@@ -276,6 +276,48 @@ This checklist confirms all requirements from the UI system specification have b
 
 ---
 
+## L) TIMER EXECUTION TOOLS (PLANNED)
+
+### timer_execution_tools
+
+- [ ] **TN-01** Add Task button to timer top bar (ui)
+  - [ ] Add icon button labeled Task to the timer top bar
+  - [ ] Button opens a panel for task and notes editing
+- [ ] **TN-02** Create Task and Notes panel (ui)
+  - [ ] Create panel using Dialog or Sheet component
+  - [ ] Add single-line input for task title
+  - [ ] Add multi-line textarea for notes
+- [ ] **TN-03** Create Task state hook (state)
+  - [ ] Create `useTask` hook
+  - [ ] Store `taskTitle` and `notes`
+  - [ ] Expose setters for `taskTitle` and `notes`
+- [ ] **TN-04** Persist task and notes locally (storage)
+  - [ ] Save `taskTitle` and `notes` to localStorage
+  - [ ] Restore `taskTitle` and `notes` on app load
+- [ ] **TN-05** Bind task title to timer screen (ui)
+  - [ ] Display task title under timer digits
+  - [ ] Update displayed task when `taskTitle` changes
+- [ ] **TN-06** Create Focus Lock button (ui)
+  - [ ] Add icon button labeled Focus Lock to timer top bar
+  - [ ] Button toggles focus lock state
+- [ ] **FL-01** Create Focus Lock state (state)
+  - [ ] Create `focusLockEnabled` boolean state
+  - [ ] Expose enable and disable functions
+- [ ] **FL-02** Implement fullscreen focus lock (behavior)
+  - [ ] Enter fullscreen when focus lock is enabled
+  - [ ] Exit fullscreen when focus lock is disabled
+- [ ] **FL-03** Hide UI chrome during focus lock (behavior)
+  - [ ] Add `data-focus-lock` attribute to app root
+  - [ ] Hide non-essential UI elements when attribute is present
+- [ ] **FL-04** Warn on tab change during focus lock (behavior)
+  - [ ] Listen for window blur event
+  - [ ] If focus lock enabled and timer running, show warning overlay
+- [ ] **FL-05** Disable focus lock when timer stops (rule)
+  - [ ] Automatically disable focus lock when timer is paused or completed
+  - [ ] Restore UI chrome and exit fullscreen
+
+---
+
 ## ✨ HIGHLIGHTS
 
 1. **Zero Dependencies**: Pure CSS, no frameworks

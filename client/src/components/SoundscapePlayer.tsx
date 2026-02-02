@@ -199,10 +199,10 @@ export function SoundscapePlayer({
         onClick={() => setIsOpen((prev) => !prev)}
         type="button"
         aria-label="Toggle soundscape modal"
-        className="pointer-events-auto z-50 relative flex items-center justify-center"
+        className="stats-item__button"
         ref={triggerRef}
       >
-        <Music size={20} />
+        <Music size={24} />
       </button>
 
       {/* Single rainfall audio element */}

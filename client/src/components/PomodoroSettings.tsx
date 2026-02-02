@@ -79,7 +79,7 @@ export function PomodoroSettings({
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(!isOpen)}
-        className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10"
+        className="!text-white/80 hover:!text-white hover:!bg-white/10 [&_svg]:!text-white/80 [&_svg]:hover:!text-white"
         title="Timer settings"
       >
         <MoreVertical size={20} />
@@ -109,7 +109,7 @@ export function PomodoroSettings({
               letterSpacing: 'var(--letter-ui)',
             }}
           >
-            Settings
+            Session Menu
           </div>
 
           <div
@@ -132,11 +132,12 @@ export function PomodoroSettings({
               <div
                 style={{
                   height: '100%',
-                  background: `linear-gradient(90deg, var(--neon-400), var(--neon-300))`,
+                  background:
+                    'linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6))',
                   width: `${Math.max(0, Math.min(100, (secondsLeft / totalSeconds) * 100))}%`,
                   transition: 'width 0.3s ease-out',
                   borderRadius: '2px',
-                  boxShadow: '0 0 8px rgba(52, 211, 153, 0.6)',
+                  boxShadow: '0 0 8px rgba(255, 255, 255, 0.3)',
                 }}
               />
             </div>
@@ -398,7 +399,7 @@ export function PomodoroSettings({
                     borderRadius: '12px',
                     border: '1px solid var(--border-outer)',
                     background: item.enabled
-                      ? 'var(--neon-400)'
+                      ? 'rgba(255, 255, 255, 0.8)'
                       : 'var(--surface-3)',
                     transition: 'all 0.15s ease-out',
                     display: 'flex',

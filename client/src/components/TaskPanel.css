@@ -1,0 +1,140 @@
+.task-panel {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-panel__title {
+  padding-inline: 0;
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+}
+
+.task-panel__content {
+  padding-inline: 0;
+}
+
+.task-panel__card {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+  width: 360px;
+  max-height: 520px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  z-index: 200;
+  overflow: hidden;
+}
+
+.task-panel__list {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.task-panel__list-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-panel__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.06);
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.task-panel__item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.task-panel__item--active {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.task-panel__item-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-panel__remove {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 2px;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.task-panel__remove:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.task-panel__empty {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+  padding: 28px 0 18px;
+}
+
+.task-panel__footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-panel__input {
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-size: 13px !important;
+  padding: 10px 12px !important;
+  border-radius: 10px !important;
+}
+
+.task-panel__add {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.task-panel__add:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.95);
+}

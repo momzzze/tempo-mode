@@ -78,7 +78,7 @@ export default function App() {
                   size="icon"
                   asChild
                   title="Home"
-                  className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10"
+                  className="!text-white/80 hover:!text-white hover:!bg-white/10"
                 >
                   <Link to="/">
                     <Home size={20} />
@@ -92,7 +92,7 @@ export default function App() {
                       size="icon"
                       asChild
                       title="Login"
-                      className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10"
+                      className="!text-white/80 hover:!text-white hover:!bg-white/10"
                     >
                       <Link to="/login">
                         <LogIn size={20} />
@@ -103,7 +103,7 @@ export default function App() {
                       size="icon"
                       asChild
                       title="Register"
-                      className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10"
+                      className="!text-white/80 hover:!text-white hover:!bg-white/10"
                     >
                       <Link to="/register">
                         <UserPlus size={20} />
@@ -119,7 +119,7 @@ export default function App() {
                       size="icon"
                       asChild
                       title="App"
-                      className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10"
+                      className="!text-white/80 hover:!text-white hover:!bg-white/10"
                     >
                       <Link to="/app">
                         <LayoutDashboard size={20} />
@@ -129,7 +129,7 @@ export default function App() {
                       variant="ghost"
                       size="icon"
                       title="Logout"
-                      className="text-[var(--neon-400)] !hover:text-[var(--neon-200)] !hover:bg-[var(--neon-400)]/10 cursor-pointer"
+                      className="!text-white/80 hover:!text-white hover:!bg-white/10 cursor-pointer"
                       onClick={() => {
                         dispatch(logout());
                         router.navigate({ to: '/' });
