@@ -195,7 +195,7 @@ export function PomodoroSettings({
                   type="number"
                   min={1}
                   max={120}
-                  value={focusDuration}
+                  value={String(focusDuration)}
                   onChange={(e) => onFocusChange(Number(e.target.value))}
                   className="pomodoro-settings__duration-input"
                 />
@@ -210,7 +210,7 @@ export function PomodoroSettings({
                   type="number"
                   min={1}
                   max={60}
-                  value={breakDuration}
+                  value={String(breakDuration)}
                   onChange={(e) => onBreakChange(Number(e.target.value))}
                   className="pomodoro-settings__duration-input"
                 />

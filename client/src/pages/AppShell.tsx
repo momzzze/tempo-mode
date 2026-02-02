@@ -153,12 +153,50 @@ export default function AppShell() {
     saveTimerState(state);
   }, [mode, secondsLeft, isRunning, activeTask, completed, totalFocusSec]);
 
+  // Save timer settings to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        'tempo-mode-timer-settings',
+        JSON.stringify({
+          focusDuration: timerSettings.focusDuration,
+          breakDuration: timerSettings.breakDuration,
+          soundEnabled: timerSettings.soundEnabled,
+          autoStart: timerSettings.autoStart,
+          hideSeconds: timerSettings.hideSeconds,
+          notifications: timerSettings.notifications,
+          timerStyle: timerSettings.timerStyle,
+        })
+      );
+    } catch (e) {
+      console.error('Failed to save timer settings:', e);
+    }
+  }, [
+    timerSettings.focusDuration,
+    timerSettings.breakDuration,
+    timerSettings.soundEnabled,
+    timerSettings.autoStart,
+    timerSettings.hideSeconds,
+    timerSettings.notifications,
+    timerSettings.timerStyle,
+  ]);
+
   // Load saved task if no tasks exist
   useEffect(() => {
     if (tasks.length === 0 && savedState?.task) {
       addTask(savedState.task);
     }
   }, []);
+
+  // Update secondsLeft when duration changes for the current mode
+  useEffect(() => {
+    if (!isRunning) {
+      // Only update if timer is not running
+      const newDuration =
+        mode === 'focus' ? focusDuration * 60 : breakDuration * 60;
+      setSecondsLeft(newDuration);
+    }
+  }, [focusDuration, breakDuration, mode, isRunning]);
 
   // Update favicon based on timer state
   useEffect(() => {
