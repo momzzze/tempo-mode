@@ -3,6 +3,7 @@ import { MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import './PomodoroSettings.css';
 
 type TimerStyle = 'classic' | 'halo';
 
@@ -57,8 +58,20 @@ export function PomodoroSettings({
   void onStyleChange;
 
   const [isOpen, setIsOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const handleMenuToggle = () => {
+    if (!isOpen && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setMenuPos({
+        top: rect.bottom + 4,
+        right: window.innerWidth - rect.right,
+      });
+    }
+    setIsOpen(!isOpen);
+  };
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -78,7 +91,7 @@ export function PomodoroSettings({
         ref={triggerRef}
         variant="ghost"
         size="icon"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleMenuToggle}
         className="!text-white/80 hover:!text-white hover:!bg-white/10 [&_svg]:!text-white/80 [&_svg]:hover:!text-white"
         title="Timer settings"
       >
@@ -87,260 +100,77 @@ export function PomodoroSettings({
 
       {isOpen && (
         <div
+          className="pomodoro-settings__menu"
           style={{
-            position: 'absolute',
-            top: '100%',
-            right: 0,
-            marginTop: '4px',
-            minWidth: '280px',
-            background: 'var(--surface-1)',
-            border: '1px solid var(--border-outer)',
-            borderRadius: 'var(--radius-sm)',
-            zIndex: 100,
-            padding: 'var(--space-2)',
+            top: `${menuPos.top}px`,
+            right: `${menuPos.right}px`,
           }}
         >
-          <div
-            style={{
-              fontSize: 'var(--font-size-xs)',
-              color: 'var(--gray-500)',
-              marginBottom: 'var(--space-2)',
-              textTransform: 'uppercase',
-              letterSpacing: 'var(--letter-ui)',
-            }}
-          >
-            Session Menu
-          </div>
+          <div className="pomodoro-settings__section-title">Session Menu</div>
 
-          <div
-            style={{
-              marginBottom: 'var(--space-2)',
-              display: 'flex',
-              gap: 'var(--space-1)',
-              alignItems: 'center',
-            }}
-          >
-            <div
-              style={{
-                flex: 1,
-                height: '4px',
-                background: 'var(--surface-2)',
-                borderRadius: '2px',
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  height: '100%',
-                  background:
-                    'linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6))',
-                  width: `${Math.max(0, Math.min(100, (secondsLeft / totalSeconds) * 100))}%`,
-                  transition: 'width 0.3s ease-out',
-                  borderRadius: '2px',
-                  boxShadow: '0 0 8px rgba(255, 255, 255, 0.3)',
-                }}
-              />
-            </div>
-            <span
-              style={{
-                fontSize: 'var(--font-size-xs)',
-                color: 'var(--gray-500)',
-                minWidth: '28px',
-              }}
-            >
-              {Math.ceil(secondsLeft / 60)}m
-            </span>
-          </div>
-
-          <div style={{ marginBottom: 'var(--space-2)' }}>
+          <div className="pomodoro-settings__actions">
             <button
-              style={{
-                width: '100%',
-                padding: 'var(--space-1) var(--space-2)',
-                fontSize: 'var(--font-size-xs)',
-                background: 'var(--surface-2)',
-                color: 'var(--gray-400)',
-                border: 'none',
-                borderRadius: 'var(--radius-xs)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease-out',
-                textAlign: 'left',
-              }}
+              className="pomodoro-settings__button"
               onClick={() => {
                 onComplete();
                 setIsOpen(false);
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--gray-300)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--gray-400)';
               }}
             >
               Complete timer
             </button>
             <button
-              style={{
-                width: '100%',
-                padding: 'var(--space-1) var(--space-2)',
-                fontSize: 'var(--font-size-xs)',
-                background: 'var(--surface-2)',
-                color: 'var(--gray-400)',
-                border: 'none',
-                borderRadius: 'var(--radius-xs)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease-out',
-                textAlign: 'left',
-                marginTop: 'var(--space-1)',
-              }}
+              className="pomodoro-settings__button"
               onClick={() => {
                 onRestart();
                 setIsOpen(false);
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--gray-300)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--gray-400)';
               }}
             >
               Restart timer
             </button>
             <button
-              style={{
-                width: '100%',
-                padding: 'var(--space-1) var(--space-2)',
-                fontSize: 'var(--font-size-xs)',
-                background: 'var(--surface-2)',
-                color: 'var(--gray-400)',
-                border: 'none',
-                borderRadius: 'var(--radius-xs)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease-out',
-                textAlign: 'left',
-                marginTop: 'var(--space-1)',
-              }}
+              className="pomodoro-settings__button"
               onClick={() => {
                 onAddTime();
                 setIsOpen(false);
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--gray-300)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--gray-400)';
               }}
             >
               + Add 10 minutes
             </button>
           </div>
 
-          <div
-            style={{
-              height: '1px',
-              background: 'var(--border-inner)',
-              marginBottom: 'var(--space-2)',
-            }}
-          />
+          <div className="pomodoro-settings__divider" />
 
-          <div style={{ marginBottom: 'var(--space-2)' }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--space-2)',
-                marginBottom: 'var(--space-1)',
-              }}
-            >
-              <Label
-                style={{
-                  flex: 1,
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--gray-400)',
-                }}
-              >
-                Focus
-              </Label>
+          <div className="pomodoro-settings__durations">
+            <div className="pomodoro-settings__duration-row">
+              <Label className="pomodoro-settings__duration-label">Focus</Label>
               <Input
                 type="number"
                 min={1}
                 max={120}
                 value={focusDuration}
                 onChange={(e) => onFocusChange(Number(e.target.value))}
-                style={{
-                  width: '60px',
-                  textAlign: 'right',
-                  background: 'var(--surface-2)',
-                  border: '1px solid var(--border-outer)',
-                  borderRadius: 'var(--radius-xs)',
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--gray-400)',
-                  padding: 'var(--space-1)',
-                }}
+                className="pomodoro-settings__duration-input"
               />
-              <span
-                style={{
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--gray-500)',
-                }}
-              >
-                min
-              </span>
+              <span className="pomodoro-settings__duration-unit">min</span>
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--space-2)',
-              }}
-            >
-              <Label
-                style={{
-                  flex: 1,
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--gray-400)',
-                }}
-              >
-                Break
-              </Label>
+            <div className="pomodoro-settings__duration-row">
+              <Label className="pomodoro-settings__duration-label">Break</Label>
               <Input
                 type="number"
                 min={1}
                 max={60}
                 value={breakDuration}
                 onChange={(e) => onBreakChange(Number(e.target.value))}
-                style={{
-                  width: '60px',
-                  textAlign: 'right',
-                  background: 'var(--surface-2)',
-                  border: '1px solid var(--border-outer)',
-                  borderRadius: 'var(--radius-xs)',
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--gray-400)',
-                  padding: 'var(--space-1)',
-                }}
+                className="pomodoro-settings__duration-input"
               />
-              <span
-                style={{
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--gray-500)',
-                }}
-              >
-                min
-              </span>
+              <span className="pomodoro-settings__duration-unit">min</span>
             </div>
           </div>
 
-          <div
-            style={{
-              height: '1px',
-              background: 'var(--border-inner)',
-              marginBottom: 'var(--space-2)',
-            }}
-          />
+          <div className="pomodoro-settings__divider" />
 
-          <div>
+          <div className="pomodoro-settings__toggles">
             {[
               {
                 label: 'Timer sound effects',
@@ -362,61 +192,29 @@ export function PomodoroSettings({
                 enabled: notifications,
                 onToggle: onNotificationsToggle,
               },
-            ].map((item, idx) => (
+            ].map((item) => (
               <button
                 key={item.label}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: 'var(--space-1) var(--space-2)',
-                  fontSize: 'var(--font-size-xs)',
-                  background: 'var(--surface-2)',
-                  color: 'var(--gray-400)',
-                  border: 'none',
-                  borderRadius: 'var(--radius-xs)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease-out',
-                  marginTop: idx > 0 ? 'var(--space-1)' : 0,
-                }}
+                className="pomodoro-settings__toggle-button"
                 onClick={() => {
                   item.onToggle();
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = 'var(--gray-300)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--gray-400)';
                 }}
                 aria-pressed={item.enabled}
               >
                 <span>{item.label}</span>
                 <span
-                  style={{
-                    height: '16px',
-                    width: '28px',
-                    borderRadius: '12px',
-                    border: '1px solid var(--border-outer)',
-                    background: item.enabled
-                      ? 'rgba(255, 255, 255, 0.8)'
-                      : 'var(--surface-3)',
-                    transition: 'all 0.15s ease-out',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: item.enabled ? 'flex-end' : 'flex-start',
-                    padding: '2px',
-                  }}
+                  className={`pomodoro-settings__toggle-switch ${
+                    item.enabled
+                      ? 'pomodoro-settings__toggle-switch--active'
+                      : 'pomodoro-settings__toggle-switch--inactive'
+                  }`}
                 >
                   <span
-                    style={{
-                      width: '10px',
-                      height: '10px',
-                      borderRadius: '50%',
-                      background: item.enabled
-                        ? 'var(--gray-900)'
-                        : 'var(--gray-500)',
-                    }}
+                    className={`pomodoro-settings__toggle-knob ${
+                      item.enabled
+                        ? 'pomodoro-settings__toggle-knob--active'
+                        : 'pomodoro-settings__toggle-knob--inactive'
+                    }`}
                   />
                 </span>
               </button>

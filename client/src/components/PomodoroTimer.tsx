@@ -13,6 +13,7 @@ import {
   TimerTaskInput,
 } from '@/components/ui/timer';
 import { cn } from '@/lib/utils';
+import './PomodoroTimer.css';
 
 interface PomodoroTimerProps {
   mode: 'focus' | 'break';
@@ -25,6 +26,8 @@ interface PomodoroTimerProps {
   onTaskChange: (task: string) => void;
   variant: 'minimal' | 'halo';
   settingsSlot?: React.ReactNode;
+  secondsLeft?: number;
+  totalSeconds?: number;
 }
 export function PomodoroTimer({
   mode,
@@ -37,9 +40,31 @@ export function PomodoroTimer({
   onTaskChange,
   variant,
   settingsSlot,
+  secondsLeft = 0,
+  totalSeconds = 1,
 }: PomodoroTimerProps) {
   const isHalo = variant === 'halo';
   const [isHovered, setIsHovered] = React.useState(false);
+  const [isClockHovered, setIsClockHovered] = React.useState(false);
+  const hideClockTimeoutRef = React.useRef<number | null>(null);
+
+  const handleClockEnter = () => {
+    if (hideClockTimeoutRef.current) {
+      window.clearTimeout(hideClockTimeoutRef.current);
+      hideClockTimeoutRef.current = null;
+    }
+    setIsClockHovered(true);
+  };
+
+  const handleClockLeave = () => {
+    if (hideClockTimeoutRef.current) {
+      window.clearTimeout(hideClockTimeoutRef.current);
+    }
+    hideClockTimeoutRef.current = window.setTimeout(() => {
+      setIsClockHovered(false);
+      hideClockTimeoutRef.current = null;
+    }, 250);
+  };
 
   return (
     <Timer
@@ -53,17 +78,6 @@ export function PomodoroTimer({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {isHovered && (
-        <TimerHeader
-          className={cn(
-            isHalo && 'absolute top-16 right-6',
-            'z-[150] transition-opacity duration-200'
-          )}
-        >
-          {settingsSlot}
-        </TimerHeader>
-      )}
-
       <div
         className={cn(
           'relative w-[min(84vw,520px)] aspect-square grid place-items-center',
@@ -110,23 +124,40 @@ export function PomodoroTimer({
           </TimerModeSelector>
 
           {/* Big digits centered */}
-          <TimerDigits
-            variant={variant}
-            isRunning={isRunning}
-            className={cn(
-              'font-sans tabular-nums leading-none',
-              'text-[clamp(64px,14vw,120px)]',
-              'tracking-tight'
-            )}
+          <div
+            className="pomodoro-timer__clock"
+            onMouseEnter={handleClockEnter}
+            onMouseLeave={handleClockLeave}
           >
-            {timeDisplay}
-          </TimerDigits>
+            <TimerDigits
+              variant={variant}
+              isRunning={isRunning}
+              className={cn(
+                'font-sans tabular-nums leading-none',
+                'text-[clamp(64px,14vw,120px)]',
+                'tracking-tight'
+              )}
+            >
+              {timeDisplay}
+            </TimerDigits>
+            {settingsSlot && isClockHovered && (
+              <div className="pomodoro-timer__settings">{settingsSlot}</div>
+            )}
+          </div>
 
           {/* Task line under digits */}
-          <TimerTaskInput
-            variant={variant}
-            className="absolute bottom-[24%] left-1/2 -translate-x-1/2 w-[86%]"
-          >
+          <TimerTaskInput variant={variant} className="pomodoro-timer__task">
+            {/* Progress bar under digits */}
+            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-4">
+              <div
+                className="h-full bg-gradient-to-r from-white/80 to-white/60 rounded-full transition-all duration-300 ease-out"
+                style={{
+                  width: `${Math.max(0, Math.min(100, (secondsLeft / totalSeconds) * 100))}%`,
+                  boxShadow: '0 0 8px rgba(255, 255, 255, 0.3)',
+                }}
+              />
+            </div>
+
             <Label
               className={cn(
                 'block text-center',
@@ -145,8 +176,7 @@ export function PomodoroTimer({
                   'mt-3',
                   'text-center',
                   'text-white/90 font-mono text-[clamp(16px,2.8vw,24px)]',
-                  'tracking-wide',
-                  'border-b border-white/25 pb-2'
+                  'tracking-wide'
                 )}
               >
                 {task}

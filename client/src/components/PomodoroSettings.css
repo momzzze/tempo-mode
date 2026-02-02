@@ -1,0 +1,214 @@
+/* Pomodoro Settings Modal */
+.pomodoro-settings__menu {
+  position: fixed;
+  min-width: 280px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  z-index: 100;
+  padding: 20px;
+  overflow: visible;
+}
+
+.pomodoro-settings__menu::-webkit-scrollbar {
+  display: none;
+}
+
+.pomodoro-settings__section-title {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* Progress Bar */
+.pomodoro-settings__progress-wrapper {
+  margin-bottom: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pomodoro-settings__progress-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pomodoro-settings__progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.6)
+  );
+  transition: width 0.3s ease-out;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.pomodoro-settings__progress-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  min-width: 28px;
+}
+
+/* Action Buttons */
+.pomodoro-settings__actions {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pomodoro-settings__button {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+  text-align: left;
+}
+
+.pomodoro-settings__button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Divider */
+.pomodoro-settings__divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-bottom: 12px;
+}
+
+/* Duration Inputs */
+.pomodoro-settings__durations {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pomodoro-settings__duration-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 0;
+}
+
+.pomodoro-settings__duration-label {
+  flex: 1;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.pomodoro-settings__duration-input {
+  width: 32px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0;
+  height: 20px;
+  line-height: 20px;
+  transition: all 160ms ease;
+  -moz-appearance: textfield;
+}
+
+.pomodoro-settings__duration-input::-webkit-outer-spin-button,
+.pomodoro-settings__duration-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pomodoro-settings__duration-input:focus {
+  outline: none;
+  border-bottom-color: rgba(255, 255, 255, 0.5);
+}
+
+.pomodoro-settings__duration-unit {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Toggle Buttons */
+.pomodoro-settings__toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pomodoro-settings__toggle-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.pomodoro-settings__toggle-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Toggle Switch */
+.pomodoro-settings__toggle-switch {
+  height: 16px;
+  width: 28px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  transition: all 160ms ease;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+
+.pomodoro-settings__toggle-switch--active {
+  background: rgba(255, 255, 255, 0.8);
+  justify-content: flex-end;
+}
+
+.pomodoro-settings__toggle-switch--inactive {
+  background: rgba(255, 255, 255, 0.08);
+  justify-content: flex-start;
+}
+
+.pomodoro-settings__toggle-knob {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transition: background 160ms ease;
+}
+
+.pomodoro-settings__toggle-knob--active {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.pomodoro-settings__toggle-knob--inactive {
+  background: rgba(255, 255, 255, 0.5);
+}

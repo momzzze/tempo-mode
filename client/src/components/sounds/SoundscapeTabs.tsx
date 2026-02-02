@@ -10,15 +10,13 @@ export function SoundscapeTabs({
   onTabChange,
 }: SoundscapeTabsProps) {
   return (
-    <div className="flex justify-center p-4 gap-3">
+    <div className="soundscape-tabs">
       {tabs.map((tab) => (
         <button
           key={tab.name}
           onClick={() => onTabChange(tab.name)}
-          className={`element-spacing rounded-md px-6 py-2 text-center whitespace-nowrap cursor-pointer transition-all ${
-            activeTab === tab.name
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-400 text-gray-900'
+          className={`soundscape-tab ${
+            activeTab === tab.name ? 'soundscape-tab--active' : ''
           }`}
         >
           {tab.name}

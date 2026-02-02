@@ -106,6 +106,7 @@ export default function AppShell() {
     savedState?.totalFocusSec ?? 0
   );
   const [soundscapePlaying, setSoundscapePlaying] = useState(false);
+  const [soundscapeOpen, setSoundscapeOpen] = useState(false);
   const intervalRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const {
@@ -407,6 +408,7 @@ export default function AppShell() {
             timerMode={mode}
             isRunning={isRunning}
             onPlayingChange={setSoundscapePlaying}
+            onOpenChange={setSoundscapeOpen}
           />
           <div className="stats-item__label">Sounds</div>
         </div>
@@ -415,39 +417,45 @@ export default function AppShell() {
         {showBackground && (
           <div className="fixed inset-0 -z-10 opacity-100 transition-opacity duration-500">
             <img
-              src={backgroundUrl ?? ''}
-              alt="Background"
-              className="h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/75" />
-          </div>
-        )}
-
-        <div
-          className={
-            variant === 'halo'
-              ? 'flex flex-col items-center justify-center gap-8 px-6 py-10'
-              : 'px-6 py-10'
-          }
-        >
-          <div
-            className={
-              variant === 'halo'
-                ? 'flex flex-col items-center justify-center gap-8 px-6 py-10'
-                : 'px-6 py-10'
-            }
-          >
-            <div className="flex flex-col items-center overflow-visible">
-              <PomodoroTimer
-                mode={mode}
-                onModeChange={(next) => switchMode(next)}
-                timeDisplay={formatted}
-                isRunning={isRunning}
-                onStart={handleStart}
-                onPause={handlePause}
-                task={activeTask}
-                onTaskChange={() => {}}
-                variant={variant}
+                  soundscapeOpen ? null : (
+                    <PomodoroSettings
+                      onComplete={() => dispatch(completeTimer())}
+                      onRestart={() => dispatch(restartTimer())}
+                      onAddTime={() => dispatch(addTimeToTimer())}
+                      focusDuration={timerSettings.focusDuration}
+                      breakDuration={timerSettings.breakDuration}
+                      onFocusChange={(mins) => dispatch(setFocusDuration(mins))}
+                      onBreakChange={(mins) => dispatch(setBreakDuration(mins))}
+                      soundEnabled={timerSettings.soundEnabled}
+                      onSoundToggle={() => dispatch(toggleSound())}
+                      autoStart={timerSettings.autoStart}
+                      onAutoStartToggle={() => dispatch(toggleAutoStart())}
+                      hideSeconds={timerSettings.hideSeconds}
+                      onHideSecondsToggle={() => dispatch(toggleHideSeconds())}
+                      notifications={timerSettings.notifications}
+                      onNotificationsToggle={() => {
+                        if (
+                          !timerSettings.notifications &&
+                          'Notification' in window
+                        ) {
+                          Notification.requestPermission();
+                        }
+                        dispatch(toggleNotifications());
+                      }}
+                      timerStyle={timerStyle}
+                      onStyleChange={(style) => dispatch(setTimerStyle(style))}
+                      secondsLeft={secondsLeft}
+                      totalSeconds={
+                        mode === 'focus'
+                          ? focusDuration * 60
+                          : breakDuration * 60
+                      }
+                    />
+                  )
+                secondsLeft={secondsLeft}
+                totalSeconds={
+                  mode === 'focus' ? focusDuration * 60 : breakDuration * 60
+                }
                 settingsSlot={
                   <PomodoroSettings
                     onComplete={() => dispatch(completeTimer())}

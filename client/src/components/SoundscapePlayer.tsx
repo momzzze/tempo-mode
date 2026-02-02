@@ -17,11 +17,12 @@ const tagElements = [
       {
         name: 'Rainfall',
         audioFiles: [RAINFALL_URL, RAINFALL_UMBRELLA_URL],
+        icon: 'CloudRain',
       },
-      { name: 'Thunderstorm', audioFiles: [] },
-      { name: 'Garden', audioFiles: [] },
-      { name: 'River', audioFiles: [] },
-      { name: 'Forest', audioFiles: [] },
+      { name: 'Thunderstorm', audioFiles: [], icon: 'Cloud' },
+      { name: 'Garden', audioFiles: [], icon: 'Leaf' },
+      { name: 'River', audioFiles: [], icon: 'Waves' },
+      { name: 'Forest', audioFiles: [], icon: 'Trees' },
     ],
   },
   { name: 'Youtube' },
@@ -32,12 +33,14 @@ export interface SoundscapePlayerProps {
   timerMode?: 'focus' | 'break';
   isRunning?: boolean;
   onPlayingChange?: (isPlaying: boolean) => void;
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 export function SoundscapePlayer({
   timerMode = 'focus',
   isRunning = false,
   onPlayingChange,
+  onOpenChange,
 }: SoundscapePlayerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Soundscapes');
@@ -193,6 +196,10 @@ export function SoundscapePlayer({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
+
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
   return (
     <div className="relative inline-block pointer-events-auto">
       <button

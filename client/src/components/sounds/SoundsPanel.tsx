@@ -4,6 +4,7 @@ import * as LucideIcons from 'lucide-react';
 import { SOUNDSCAPES } from '../../audio/soundscapes';
 import { useSoundscapeEngine } from '../../hooks/useSoundscapeEngine';
 import { DraggablePanel } from '../DraggablePanel';
+import './SoundsPanel.css';
 
 type TabType = 'recent' | 'soundscapes' | 'spotify' | 'youtube' | 'custom';
 
@@ -89,45 +90,41 @@ export function SoundsPanel() {
 
         {/* Content */}
         {activeTab === 'soundscapes' && (
-          <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
+          <div className="sounds-panel__soundscapes">
             {SOUNDSCAPES.map((soundscape) => {
               const isActive = currentSoundscapeId === soundscape.id;
               return (
-                <div key={soundscape.id} className="aspect-square relative">
-                  <button
-                    className={`w-full h-full flex flex-col items-center justify-center gap-1 rounded-md cursor-pointer transition-all p-2 border ${
-                      isActive
-                        ? 'bg-white/15 border-[var(--neon-400)]'
-                        : 'bg-white/5 border-white/10 hover:bg-white/10'
-                    }`}
-                    onClick={() => selectSoundscape(soundscape.id)}
-                  >
-                    <div className="text-white flex items-center justify-center">
-                      {getIconComponent(soundscape.icon)}
-                    </div>
-                    <div
-                      className={`text-xs font-medium text-center ${
-                        isActive ? 'text-[var(--neon-400)]' : 'text-white/70'
-                      }`}
+                <div
+                  key={soundscape.id}
+                  className={`sounds-panel__soundscape-item ${
+                    isActive ? 'sounds-panel__soundscape-item--active' : ''
+                  }`}
+                  onClick={() => selectSoundscape(soundscape.id)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="sounds-panel__soundscape-icon">
+                    {getIconComponent(soundscape.icon)}
+                  </div>
+                  <div className="sounds-panel__soundscape-name">
+                    {soundscape.name}
+                  </div>
+                  {isActive && (
+                    <button
+                      className="sounds-panel__play-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        isPlaying ? pause() : play();
+                      }}
+                      title={isPlaying ? 'Pause' : 'Play'}
                     >
-                      {soundscape.name}
-                    </div>
-                    {isActive && (
-                      <button
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[var(--neon-400)] flex items-center justify-center text-white cursor-pointer z-10 shadow-lg transition-all hover:scale-110 active:scale-105"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          isPlaying ? pause() : play();
-                        }}
-                      >
-                        {isPlaying ? (
-                          <Pause size={18} fill="white" />
-                        ) : (
-                          <Play size={18} fill="white" />
-                        )}
-                      </button>
-                    )}
-                  </button>
+                      {isPlaying ? (
+                        <Pause size={16} fill="white" />
+                      ) : (
+                        <Play size={16} fill="white" />
+                      )}
+                    </button>
+                  )}
                 </div>
               );
             })}

@@ -116,7 +116,7 @@ const TimerTaskInput = React.forwardRef<
     ref={ref}
     className={cn(
       'mt-6',
-      variant === 'minimal' && 'pt-4 border-t border-white/10',
+      variant === 'minimal' && 'pt-4',
       variant === 'halo' && 'w-[min(520px,90vw)] text-center mt-4 pt-4',
       className
     )}
