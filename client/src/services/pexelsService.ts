@@ -13,11 +13,11 @@
 
 const FALLBACK_IMAGES = [
   'https://images.pexels.com/photos/36717/amazing-animal-beautiful-beautifull.jpg',
-  'https://images.pexels.com/photos/355770/pexels-photo-355770.jpeg',
-  'https://images.pexels.com/photos/1470405/pexels-photo-1470405.jpeg',
-  'https://images.pexels.com/photos/2166711/pexels-photo-2166711.jpeg',
-  'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg',
-  'https://images.pexels.com/photos/1323550/pexels-photo-1323550.jpeg',
+  // 'https://images.pexels.com/photos/355770/pexels-photo-355770.jpeg',
+  // 'https://images.pexels.com/photos/1470405/pexels-photo-1470405.jpeg',
+  // 'https://images.pexels.com/photos/2166711/pexels-photo-2166711.jpeg',
+  // 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg',
+  // 'https://images.pexels.com/photos/1323550/pexels-photo-1323550.jpeg',
 ];
 
 export async function fetchRandomWorldImage(): Promise<string> {

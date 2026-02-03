@@ -1,10 +1,11 @@
 .pomodoro-timer__task {
   position: absolute;
-  bottom: 22%;
+  bottom: 24%;
   left: 50%;
   transform: translateX(-50%);
   width: 86%;
   padding-top: 8px;
+  z-index: 1;
 }
 
 .pomodoro-timer__clock {
@@ -16,6 +17,7 @@
   padding-top: 8px;
   padding-bottom: 8px;
   filter: drop-shadow(0 4px 12px rgba(224, 170, 170, 0.1));
+  z-index: 10;
 }
 
 .pomodoro-timer__settings {

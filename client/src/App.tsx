@@ -1,48 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useRouter } from '@tanstack/react-router';
-import { Home, LogIn, UserPlus, LayoutDashboard, LogOut } from 'lucide-react';
-import { useTheme } from './theme/useTheme';
-import ThemeDropdown from './components/ThemeDropdown';
+import { Home, LogIn, UserPlus, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { fetchRandomWorldImage } from './services/pexelsService';
-import {
-  useAppDispatch,
-  useAppSelector,
-  selectIsAuthed,
-  logout,
-} from './store';
+import { useAppDispatch, useAppSelector, selectIsAuthed } from './store';
+import { ProfileSection } from './components/ProfileSection';
 
 export default function App() {
-  const { theme, setPalette, setMode, palettes, modes } = useTheme();
   const router = useRouter();
   const dispatch = useAppDispatch();
   const isAuthed = useAppSelector(selectIsAuthed);
 
-  type Layer = 'solid' | 'fog';
-  const [layer, setLayer] = useState<Layer>(() => {
-    if (typeof window === 'undefined') return 'solid';
-    const stored = window.localStorage.getItem(
-      'tempo-mode-layer'
-    ) as Layer | null;
-    return stored === 'fog' || stored === 'solid' ? stored : 'solid';
-  });
-
   // Background image state
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    document.documentElement.dataset.layer = layer;
-    window.localStorage.setItem('tempo-mode-layer', layer);
-  }, [layer]);
 
   // Load background image on mount
   useEffect(() => {
     fetchRandomWorldImage().then(setBackgroundUrl);
   }, []);
-
-  const currentMode = theme.endsWith('-light') ? 'light' : 'dark';
-  const currentPalette = theme.split('-')[0];
 
   return (
     <div className="relative min-h-screen text-white">
@@ -125,32 +100,9 @@ export default function App() {
                         <LayoutDashboard size={20} />
                       </Link>
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      title="Logout"
-                      className="!text-white/80 hover:!text-white hover:!bg-white/10 cursor-pointer"
-                      onClick={() => {
-                        dispatch(logout());
-                        router.navigate({ to: '/' });
-                      }}
-                    >
-                      <LogOut size={20} />
-                    </Button>
+                    <ProfileSection />
                   </>
                 )}
-                <>
-                  <ThemeDropdown
-                    palettes={palettes}
-                    modes={modes}
-                    currentPalette={currentPalette}
-                    currentMode={currentMode}
-                    currentLayer={layer}
-                    onPaletteChange={setPalette}
-                    onModeChange={setMode}
-                    onLayerChange={setLayer}
-                  />
-                </>
               </div>
             </div>
           </div>

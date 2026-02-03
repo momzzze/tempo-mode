@@ -156,7 +156,7 @@ export function PomodoroTimer({
           {/* Task line under digits */}
           <TimerTaskInput variant={variant} className="pomodoro-timer__task">
             {/* Progress bar under digits */}
-            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-4">
+            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mb-2">
               <div
                 className="h-full bg-gradient-to-r from-white/80 to-white/60 rounded-full transition-all duration-300 ease-out"
                 style={{
@@ -170,7 +170,7 @@ export function PomodoroTimer({
               className={cn(
                 'block text-center',
                 'text-white/90',
-                'font-mono text-[clamp(18px,3.2vw,28px)]',
+                'font-mono text-[clamp(14px,2vw,18px)]',
                 'tracking-wide',
                 'drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]'
               )}
@@ -182,9 +182,9 @@ export function PomodoroTimer({
             {task && (
               <div
                 className={cn(
-                  'mt-3',
+                  'mt-1',
                   'text-center',
-                  'text-white/95 font-mono text-[clamp(16px,2.8vw,24px)]',
+                  'text-white/95 font-mono text-[clamp(13px,1.8vw,16px)]',
                   'tracking-wide',
                   'drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]'
                 )}

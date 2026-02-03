@@ -461,7 +461,7 @@ export default function AppShell() {
             />
           </div>
         )}
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-start justify-center min-h-screen pt-[19vh]">
           <PomodoroTimer
             mode={mode}
             onModeChange={switchMode}
