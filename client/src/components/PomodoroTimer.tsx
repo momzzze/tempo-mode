@@ -105,7 +105,8 @@ export function PomodoroTimer({
                         'p-0 h-auto bg-transparent shadow-none rounded-none',
                         'uppercase tracking-widest text-sm font-semibold',
                         'text-white/60 data-[state=active]:text-white',
-                        'data-[state=active]:underline underline-offset-[10px] decoration-white/60'
+                        'data-[state=active]:underline underline-offset-[10px] decoration-white/60',
+                        'drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]'
                       )}
                     >
                       Focus
@@ -118,7 +119,8 @@ export function PomodoroTimer({
                         'p-0 h-auto bg-transparent shadow-none rounded-none',
                         'uppercase tracking-widest text-sm font-semibold',
                         'text-white/60 data-[state=active]:text-white',
-                        'data-[state=active]:underline underline-offset-[10px] decoration-white/60'
+                        'data-[state=active]:underline underline-offset-[10px] decoration-white/60',
+                        'drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]'
                       )}
                     >
                       Break
@@ -167,9 +169,10 @@ export function PomodoroTimer({
             <Label
               className={cn(
                 'block text-center',
-                'text-white/85',
+                'text-white/90',
                 'font-mono text-[clamp(18px,3.2vw,28px)]',
-                'tracking-wide'
+                'tracking-wide',
+                'drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]'
               )}
             >
               I will focus on…
@@ -181,8 +184,9 @@ export function PomodoroTimer({
                 className={cn(
                   'mt-3',
                   'text-center',
-                  'text-white/90 font-mono text-[clamp(16px,2.8vw,24px)]',
-                  'tracking-wide'
+                  'text-white/95 font-mono text-[clamp(16px,2.8vw,24px)]',
+                  'tracking-wide',
+                  'drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]'
                 )}
               >
                 {task}
@@ -197,9 +201,11 @@ export function PomodoroTimer({
                 onClick={onStart}
                 className={cn(
                   'h-14 w-14 rounded-full p-0',
-                  'bg-white/15 hover:bg-white/20',
-                  'border border-white/20 text-white',
-                  'backdrop-blur-sm'
+                  'bg-black/30 hover:bg-black/40',
+                  'border border-white/40 text-white font-semibold',
+                  'backdrop-blur-md',
+                  'drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]',
+                  'hover:drop-shadow-[0_6px_16px_rgba(0,0,0,0.6)]'
                 )}
               >
                 Start
@@ -209,9 +215,11 @@ export function PomodoroTimer({
                 onClick={onPause}
                 className={cn(
                   'h-14 w-14 rounded-full p-0',
-                  'bg-white/15 hover:bg-white/20',
-                  'border border-white/20 text-white',
-                  'backdrop-blur-sm'
+                  'bg-black/30 hover:bg-black/40',
+                  'border border-white/40 text-white font-semibold',
+                  'backdrop-blur-md',
+                  'drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]',
+                  'hover:drop-shadow-[0_6px_16px_rgba(0,0,0,0.6)]'
                 )}
               >
                 {/* If you want icon-only: use lucide Pause */}

@@ -111,6 +111,24 @@ select:-webkit-autofill:focus {
   background-clip: padding-box;
 }
 
+/* Clock with improved visibility on bright backgrounds */
+.clock {
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    0 4px 12px rgba(0, 0, 0, 0.6);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+}
+
+.clock span {
+  text-shadow: inherit;
+}
+
+/* Buttons with semi-transparent backdrop for bright background visibility */
+button {
+  position: relative;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
 .shell {
   max-width: 1400px;
   margin: 0 auto;

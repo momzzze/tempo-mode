@@ -40,7 +40,15 @@ const TimerModeSelector = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('mb-8', className)} {...props} />
+  <div
+    ref={ref}
+    className={cn(
+      'mb-8 px-4 py-2 rounded-lg',
+      'bg-black/20 dark:bg-white/5',
+      className
+    )}
+    {...props}
+  />
 ));
 TimerModeSelector.displayName = 'TimerModeSelector';
 
@@ -55,12 +63,13 @@ const TimerDigits = React.forwardRef<HTMLDivElement, TimerDigitsProps>(
       ref={ref}
       className={cn(
         'font-bold tracking-wider mb-6 transition-all duration-300',
-        variant === 'minimal' && 'text-[80px] text-neutral-400',
+        variant === 'minimal' &&
+          'text-[80px] text-neutral-400 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] text-shadow-lg',
         variant === 'halo' &&
-          'text-[clamp(96px,18vw,200px)] text-white/95 drop-shadow-[0_8px_32px_rgba(0,0,0,0.3)]',
+          'text-[clamp(96px,18vw,200px)] text-white/95 drop-shadow-[0_8px_32px_rgba(0,0,0,0.5)] drop-shadow-[0_0_40px_rgba(0,0,0,0.3)]',
         isRunning &&
           variant === 'minimal' &&
-          'text-green-400 drop-shadow-[0_0_8px_rgba(51,255,136,0.25)]',
+          'text-green-400 drop-shadow-[0_0_12px_rgba(51,255,136,0.5)]',
         className
       )}
       {...props}
@@ -115,7 +124,7 @@ const TimerTaskInput = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      'mt-6',
+      'mt-6 px-4 py-3 rounded-lg',
       variant === 'minimal' && 'pt-4',
       variant === 'halo' && 'w-[min(520px,90vw)] text-center mt-4 pt-4',
       className

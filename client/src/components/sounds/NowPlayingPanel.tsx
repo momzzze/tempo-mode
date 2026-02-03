@@ -38,7 +38,7 @@ export function NowPlayingPanel({}: NowPlayingPanelProps) {
             >
               {/* Toggle Button */}
               <button
-                className={`flex-shrink-0 w-10 h-10 rounded-md flex items-center justify-center transition-all border ${
+                className={`flex-shrink-0 w-10 h-10 rounded-md flex items-center justify-center transition-all border drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] ${
                   trackState.enabled
                     ? 'bg-white/15 border-[var(--neon-400)] text-white'
                     : 'bg-transparent border-white/10 text-white/50'
@@ -53,7 +53,7 @@ export function NowPlayingPanel({}: NowPlayingPanelProps) {
 
               {/* Controls */}
               <div className="flex-1 flex flex-col gap-2 min-w-0">
-                <label className="text-xs font-medium text-white/70">
+                <label className="text-xs font-medium text-white/70 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
                   {track.label}
                 </label>
                 <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ export function NowPlayingPanel({}: NowPlayingPanelProps) {
                         : 'rgb(255,255,255,0.1)',
                     }}
                   />
-                  <span className="text-xs text-white/50 w-8 text-right">
+                  <span className="text-xs text-white/60 w-8 text-right drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
                     {Math.round(trackState.volume * 100)}%
                   </span>
                 </div>

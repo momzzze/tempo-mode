@@ -132,7 +132,7 @@ export function SoundsPanel() {
         )}
 
         {activeTab !== 'soundscapes' && (
-          <div className="p-4 text-center text-white/50 text-xs">
+          <div className="p-4 text-center text-white/60 text-xs drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
             Coming soon...
           </div>
         )}
