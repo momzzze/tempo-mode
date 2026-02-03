@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AppShell from './pages/AppShell';
+import Statistics from './pages/Statistics';
 import NotFound from './pages/NotFound';
 
 const rootRoute = createRootRoute({
@@ -39,6 +40,12 @@ const appRoute = createRoute({
   component: AppShell,
 });
 
+const statisticsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/statistics',
+  component: Statistics,
+});
+
 const notFoundRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '*',
@@ -50,6 +57,7 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   registerRoute,
   appRoute,
+  statisticsRoute,
   notFoundRoute,
 ]);
 

@@ -122,6 +122,313 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Sessions",
+            "item": [
+                {
+                    "name": "Create Session",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has session object\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('session');",
+                                    "    pm.expect(jsonData.session).to.have.property('id');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"plannedMinutes\": 25,\n  \"actualMinutes\": 25,\n  \"completed\": true,\n  \"interrupted\": false,\n  \"label\": \"Work on feature X\",\n  \"startedAt\": \"{{$isoTimestamp}}\",\n  \"endedAt\": \"{{$isoTimestamp}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sessions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sessions"
+                            ]
+                        },
+                        "description": "Create a new focus session. Requires JWT authentication."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Today Stats",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has stats\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('totalMinutes');",
+                                    "    pm.expect(jsonData).to.have.property('sessionCount');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sessions/today",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sessions",
+                                "today"
+                            ]
+                        },
+                        "description": "Get today's focus session statistics. Requires JWT authentication."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Week Stats",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has daily breakdown\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('dailyBreakdown');",
+                                    "    pm.expect(jsonData.dailyBreakdown).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sessions/week",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sessions",
+                                "week"
+                            ]
+                        },
+                        "description": "Get last 7 days focus session statistics with daily breakdown. Requires JWT authentication."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Month Stats",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has daily breakdown\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('dailyBreakdown');",
+                                    "    pm.expect(jsonData.dailyBreakdown).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sessions/month",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sessions",
+                                "month"
+                            ]
+                        },
+                        "description": "Get current month focus session statistics with daily breakdown. Requires JWT authentication."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Hourly Stats",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has hourly breakdown\", function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('hourlyBreakdown');",
+                                    "    pm.expect(jsonData.hourlyBreakdown).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sessions/hourly",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sessions",
+                                "hourly"
+                            ]
+                        },
+                        "description": "Get today's focus sessions broken down by hour (0-23). Requires JWT authentication."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Bearer Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Token is valid (200 OK)\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Token is invalid (401 Unauthorized)\", function () {",
+                                    "    if (pm.response.code === 401) {",
+                                    "        console.log(\"⚠️  Token is expired or invalid. Please login again.\");",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/sessions/today",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sessions",
+                                "today"
+                            ]
+                        },
+                        "description": "Test if the JWT bearer token is valid. Returns 200 if valid, 401 if invalid/expired. This uses the 'Get Today Stats' endpoint to verify authentication."
+                    },
+                    "response": []
+                }
+            ]
         }
     ],
     "variable": [

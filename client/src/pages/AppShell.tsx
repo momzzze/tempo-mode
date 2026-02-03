@@ -29,6 +29,7 @@ import {
   playCompletionSound,
 } from '../utils/soundUtils';
 import { updateFavicon } from '../utils/dynamicFavicon';
+import { sessionApi } from '../api/client';
 import { Coffee, CheckCircle, Clock } from 'lucide-react';
 import './AppShell.css';
 
@@ -109,6 +110,7 @@ export default function AppShell() {
   const [soundscapeOpen, setSoundscapeOpen] = useState(false);
   const intervalRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const sessionSavedRef = useRef<boolean>(false);
   const {
     tasks,
     activeTask,
@@ -196,7 +198,7 @@ export default function AppShell() {
         mode === 'focus' ? focusDuration * 60 : breakDuration * 60;
       setSecondsLeft(newDuration);
     }
-  }, [focusDuration, breakDuration, mode, isRunning]);
+  }, [focusDuration, breakDuration, mode]);
 
   // Update favicon based on timer state
   useEffect(() => {
@@ -284,6 +286,22 @@ export default function AppShell() {
       intervalRef.current = window.setInterval(() => {
         setSecondsLeft((prev) => {
           if (prev <= 1) {
+            // Save focus session if mode is focus and user is authenticated
+            // Use ref to prevent duplicate saves during mode transition
+            if (mode === 'focus' && auth.user && !sessionSavedRef.current) {
+              sessionSavedRef.current = true;
+              sessionApi
+                .createSession(
+                  focusDuration,
+                  activeTask || undefined,
+                  focusDuration
+                )
+                .catch((err) => {
+                  console.error('Failed to save focus session:', err);
+                  toast.error('Failed to save session');
+                });
+            }
+
             // Update stats before transition
             setCompleted((c) => c + (mode === 'focus' ? 1 : 0));
             if (mode === 'focus')
@@ -359,6 +377,10 @@ export default function AppShell() {
     if (soundEnabled) {
       playStartSound();
     }
+    // Reset session saved flag when starting a new session
+    if (mode === 'focus') {
+      sessionSavedRef.current = false;
+    }
     setIsRunning(true);
   };
 
@@ -378,6 +400,10 @@ export default function AppShell() {
     handlePause();
     setMode(next);
     setSecondsLeft(getDuration(next));
+    // Reset session saved flag when switching to focus mode
+    if (next === 'focus') {
+      sessionSavedRef.current = false;
+    }
   };
 
   if (auth.status === 'loading') {

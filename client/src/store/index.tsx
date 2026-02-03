@@ -18,9 +18,9 @@ export const store = configureStore({
 store.subscribe(() => {
   const state = store.getState();
   try {
-    // Persist user auth
-    if (state.user.user) {
-      localStorage.setItem(PERSIST_KEY, JSON.stringify(state.user.user));
+    // Persist only JWT token to localStorage (not full user object)
+    if (state.user.user?.token) {
+      localStorage.setItem(PERSIST_KEY, state.user.user.token);
     } else {
       localStorage.removeItem(PERSIST_KEY);
     }

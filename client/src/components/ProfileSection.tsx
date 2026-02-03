@@ -59,13 +59,13 @@ export function ProfileSection() {
 
           <button
             onClick={() => {
-              router.navigate({ to: '/settings' });
+              router.navigate({ to: '/statistics' });
               setIsOpen(false);
             }}
-            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
           >
             <Settings size={16} />
-            Settings
+            Statistics
           </button>
 
           <button

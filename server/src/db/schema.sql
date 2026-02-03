@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   plan TEXT NOT NULL DEFAULT 'free',
-  plan_activated_at TIMESTAMP,
-  created_at TIMESTAMP DEFAULT now(),
-  updated_at TIMESTAMP DEFAULT now()
+  plan_activated_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS user_settings (
@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS user_settings (
   auto_start_break BOOLEAN DEFAULT false,
   auto_start_next BOOLEAN DEFAULT false,
   theme TEXT DEFAULT 'dark',
-  created_at TIMESTAMP DEFAULT now(),
-  updated_at TIMESTAMP DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
@@ -32,9 +32,9 @@ CREATE TABLE IF NOT EXISTS sessions (
   actual_minutes INTEGER,
   completed BOOLEAN DEFAULT false,
   interrupted BOOLEAN DEFAULT false,
-  started_at TIMESTAMP NOT NULL,
-  ended_at TIMESTAMP,
-  created_at TIMESTAMP DEFAULT now()
+  started_at TIMESTAMPTZ NOT NULL,
+  ended_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS usage_limits (
