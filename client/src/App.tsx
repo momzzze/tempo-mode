@@ -107,7 +107,7 @@ export default function App() {
             </div>
           </div>
         </header>
-        <div className="min-h-[calc(100vh-64px)] justify-center flex py-8 items-center">
+        <div className="min-h-[calc(100vh-64px)] content-center py-8">
           <Outlet />
         </div>
       </div>
