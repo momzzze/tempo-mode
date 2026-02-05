@@ -53,6 +53,13 @@ export default function Statistics() {
         // LOAD REAL DATA FROM API
         // ============================================
 
+        // Load today's total stats
+        const todayData = (await sessionApi.getTodayStats()) as {
+          data: StatsData;
+        };
+        console.log('Today stats:', todayData.data);
+        setTodayMinutes(todayData.data.summary.totalMinutes);
+
         // Load hourly stats for today (Day tab: hours 0-23)
         const hourlyData = (await sessionApi.getHourlyStats()) as {
           data: Array<{
@@ -61,6 +68,7 @@ export default function Statistics() {
             sessionCount: number;
           }>;
         };
+        console.log('Hourly data:', hourlyData.data);
 
         // Day: X-axis = hours (0-23), Y-axis = minutes
         const dayChart: ChartData[] = [];
@@ -72,12 +80,13 @@ export default function Statistics() {
           });
         }
         setDayChartData(dayChart);
-        setTodayMinutes(dayChart.reduce((sum, d) => sum + d.minutes, 0));
 
         // Load week stats (Week tab: weekday names Mon-Sun)
         const weekData = (await sessionApi.getWeekStats()) as {
           data: StatsData;
         };
+        console.log('Week data:', weekData.data);
+        console.log('Week dailyBreakdown:', weekData.data.dailyBreakdown);
 
         const today = new Date();
         const weekChart: ChartData[] = [];
@@ -87,14 +96,20 @@ export default function Statistics() {
           date.setDate(date.getDate() - i);
           const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1; // Convert to Mon-Sun
           const dateStr = date.toISOString().split('T')[0];
-          const dayData = weekData.data.dailyBreakdown.find(
-            (d) => d.date === dateStr
-          );
+          console.log(`Looking for week date: ${dateStr}`);
+          const dayData = weekData.data.dailyBreakdown.find((d) => {
+            const apiDate = d.date.split('T')[0]; // Extract date part from timestamp
+            console.log(`  Comparing with: ${apiDate}`);
+            return apiDate === dateStr;
+          });
           weekChart.push({
             label: dayNames[dayIndex],
-            minutes: dayData ? dayData.totalMinutes : 0,
+            minutes: dayData
+              ? parseInt(dayData.totalMinutes.toString(), 10)
+              : 0,
           });
         }
+        console.log('Week chart data:', weekChart);
         setWeekChartData(weekChart);
         setWeekMinutes(weekData.data.summary.totalMinutes);
 
@@ -102,6 +117,8 @@ export default function Statistics() {
         const monthData = (await sessionApi.getMonthStats()) as {
           data: StatsData;
         };
+        console.log('Month data:', monthData.data);
+        console.log('Month dailyBreakdown:', monthData.data.dailyBreakdown);
 
         const year = today.getFullYear();
         const month = today.getMonth();
@@ -111,13 +128,16 @@ export default function Statistics() {
           const date = new Date(year, month, day);
           const dateStr = date.toISOString().split('T')[0];
           const dayData = monthData.data.dailyBreakdown.find(
-            (d) => d.date === dateStr
+            (d) => d.date.split('T')[0] === dateStr // Extract date part from timestamp
           );
           monthChart.push({
             label: day.toString(),
-            minutes: dayData ? dayData.totalMinutes : 0,
+            minutes: dayData
+              ? parseInt(dayData.totalMinutes.toString(), 10)
+              : 0,
           });
         }
+        console.log('Month chart data:', monthChart);
         setMonthChartData(monthChart);
         setMonthMinutes(monthData.data.summary.totalMinutes);
       } catch (error) {
@@ -178,17 +198,24 @@ export default function Statistics() {
             return `${Math.round(value / 60)}h`;
           }}
         />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip content={<CustomTooltip />} cursor={false} />
         <Bar
           dataKey="minutes"
           fill="#10b981"
           radius={[8, 8, 0, 0]}
           maxBarSize={80}
+          activeBar={{ fill: '#047857' }}
         >
           {data.map((entry, index) => (
             <Cell
               key={`cell-${index}`}
-              fill={index % 2 === 0 ? '#10b981' : '#059669'}
+              fill={
+                entry.minutes > 0
+                  ? index % 2 === 0
+                    ? '#10b981'
+                    : '#059669'
+                  : 'transparent'
+              }
             />
           ))}
         </Bar>
