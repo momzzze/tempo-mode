@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -43,11 +43,20 @@ export default function Statistics() {
   const [weekChartData, setWeekChartData] = useState<ChartData[]>([]);
   const [monthChartData, setMonthChartData] = useState<ChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('day');
+
+  // Month navigation state
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
 
   useEffect(() => {
     const loadStats = async () => {
       try {
-        setIsLoading(true);
+        if (isInitialLoading) {
+          setIsLoading(true);
+        }
 
         // ============================================
         // LOAD REAL DATA FROM API
@@ -113,19 +122,21 @@ export default function Statistics() {
         setWeekChartData(weekChart);
         setWeekMinutes(weekData.data.summary.totalMinutes);
 
-        // Load month stats (Month tab: days 1-31)
+        // Load month stats (Month tab: days 1-31) - use selected month/year
         const monthData = (await sessionApi.getMonthStats()) as {
           data: StatsData;
         };
         console.log('Month data:', monthData.data);
         console.log('Month dailyBreakdown:', monthData.data.dailyBreakdown);
 
-        const year = today.getFullYear();
-        const month = today.getMonth();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInMonth = new Date(
+          selectedYear,
+          selectedMonth + 1,
+          0
+        ).getDate();
         const monthChart: ChartData[] = [];
         for (let day = 1; day <= daysInMonth; day++) {
-          const date = new Date(year, month, day);
+          const date = new Date(selectedYear, selectedMonth, day);
           const dateStr = date.toISOString().split('T')[0];
           const dayData = monthData.data.dailyBreakdown.find(
             (d) => d.date.split('T')[0] === dateStr // Extract date part from timestamp
@@ -145,11 +156,38 @@ export default function Statistics() {
         toast.error('Failed to load statistics');
       } finally {
         setIsLoading(false);
+        setIsInitialLoading(false);
       }
     };
 
     loadStats();
-  }, []);
+  }, [selectedMonth, selectedYear]);
+
+  // Month navigation functions
+  const goToPreviousMonth = () => {
+    setActiveTab('month');
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const goToNextMonth = () => {
+    setActiveTab('month');
+    const now = new Date();
+    const isCurrentMonth =
+      selectedMonth === now.getMonth() && selectedYear === now.getFullYear();
+    if (isCurrentMonth) return; // Don't go beyond current month
+
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
 
   const formatTime = (minutes: number) => {
     if (!minutes || isNaN(minutes)) return '0m';
@@ -278,7 +316,11 @@ export default function Statistics() {
                 Loading statistics...
               </div>
             ) : (
-              <Tabs defaultValue="day" className="w-full">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-3 bg-white/5 border border-white/10">
                   <TabsTrigger
                     value="day"
@@ -329,11 +371,38 @@ export default function Statistics() {
                 </TabsContent>
 
                 <TabsContent value="month" className="mt-6">
-                  <div className="text-sm text-white/60 mb-4">
-                    {new Date().toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric',
-                    })}
+                  <div className="flex items-center justify-between mb-4">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={goToPreviousMonth}
+                      className="!text-white/60 hover:!text-white hover:!bg-white/10"
+                    >
+                      <ChevronLeft size={20} />
+                    </Button>
+                    <div className="text-sm text-white/60">
+                      {new Date(selectedYear, selectedMonth).toLocaleDateString(
+                        'en-US',
+                        {
+                          month: 'long',
+                          year: 'numeric',
+                        }
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={goToNextMonth}
+                      disabled={
+                        selectedMonth === new Date().getMonth() &&
+                        selectedYear === new Date().getFullYear()
+                      }
+                      className="!text-white/60 hover:!text-white hover:!bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <ChevronRight size={20} />
+                    </Button>
                   </div>
                   {monthChartData.length > 0 ? (
                     <ChartBar data={monthChartData} />

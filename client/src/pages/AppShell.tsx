@@ -248,12 +248,6 @@ export default function AppShell() {
     }
   }, [timerSettings.triggerAddTime]);
 
-  useEffect(() => {
-    if (auth.status !== 'loading' && (!auth.user || !auth.user.token)) {
-      router.navigate({ to: '/login' });
-    }
-  }, [auth.status, auth.user, router]);
-
   // Load background image when layer changes to fog or timerStyle is halo
   useEffect(() => {
     const currentLayer =
@@ -405,12 +399,6 @@ export default function AppShell() {
       sessionSavedRef.current = false;
     }
   };
-
-  if (auth.status === 'loading') {
-    return <div style={{ padding: 'var(--space-6)' }}>Loading…</div>;
-  }
-
-  if (!auth.user) return null;
 
   const variant: 'minimal' | 'halo' =
     timerStyle === 'halo' ? 'halo' : 'minimal';

@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link, useRouter } from '@tanstack/react-router';
-import { Home, LogIn, UserPlus, LayoutDashboard } from 'lucide-react';
+import { Home, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { fetchRandomWorldImage } from './services/pexelsService';
-import { useAppDispatch, useAppSelector, selectIsAuthed } from './store';
+import {
+  useAppDispatch,
+  useAppSelector,
+  selectIsAuthed,
+  rehydrate,
+} from './store';
 import { ProfileSection } from './components/ProfileSection';
 
 export default function App() {
@@ -18,6 +23,14 @@ export default function App() {
   useEffect(() => {
     fetchRandomWorldImage().then(setBackgroundUrl);
   }, []);
+
+  // Rehydrate auth from localStorage on mount
+  useEffect(() => {
+    const token = localStorage.getItem('tempo-mode-auth');
+    if (token) {
+      dispatch(rehydrate({ token } as any));
+    }
+  }, [dispatch]);
 
   return (
     <div className="relative min-h-screen text-white">
@@ -59,50 +72,18 @@ export default function App() {
                     <Home size={20} />
                   </Link>
                 </Button>
-
-                {!isAuthed && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      asChild
-                      title="Login"
-                      className="!text-white/80 hover:!text-white hover:!bg-white/10"
-                    >
-                      <Link to="/login">
-                        <LogIn size={20} />
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      asChild
-                      title="Register"
-                      className="!text-white/80 hover:!text-white hover:!bg-white/10"
-                    >
-                      <Link to="/register">
-                        <UserPlus size={20} />
-                      </Link>
-                    </Button>
-                  </>
-                )}
-
-                {isAuthed && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      asChild
-                      title="App"
-                      className="!text-white/80 hover:!text-white hover:!bg-white/10"
-                    >
-                      <Link to="/app">
-                        <LayoutDashboard size={20} />
-                      </Link>
-                    </Button>
-                    <ProfileSection />
-                  </>
-                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                  title="App"
+                  className="!text-white/80 hover:!text-white hover:!bg-white/10"
+                >
+                  <Link to="/app">
+                    <LayoutDashboard size={20} />
+                  </Link>
+                </Button>
+                <ProfileSection isAuthed={isAuthed} />
               </div>
             </div>
           </div>

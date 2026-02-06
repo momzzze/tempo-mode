@@ -19,7 +19,7 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: Home,
+  component: AppShell,
 });
 
 const loginRoute = createRoute({
