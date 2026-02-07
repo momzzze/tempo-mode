@@ -5,7 +5,7 @@ import {
   RouterProvider,
 } from '@tanstack/react-router';
 import App from './App';
-import Home from './pages/Home';
+// import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AppShell from './pages/AppShell';

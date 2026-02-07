@@ -149,23 +149,24 @@ export function SoundscapePlayer({
 
     if (playingElement?.name === 'Rainfall') {
       console.log('▶️ Playing rainfall');
-      rainfallAudio.current.currentTime = 0;
-      rainfallUmbrellaAudio.current.currentTime = 0;
+      if (rainfallAudio.current) rainfallAudio.current.currentTime = 0;
+      if (rainfallUmbrellaAudio.current)
+        rainfallUmbrellaAudio.current.currentTime = 0;
       rainfallAudio.current
-        .play()
+        ?.play()
         .then(() => {
           console.log('✅ Ambiance playing');
           onPlayingChange?.(true);
         })
         .catch((err) => console.error('❌ Error:', err));
       rainfallUmbrellaAudio.current
-        .play()
+        ?.play()
         .then(() => console.log('✅ Umbrella playing'))
         .catch((err) => console.error('❌ Error:', err));
     } else {
       console.log('⏸️ Pausing');
-      rainfallAudio.current.pause();
-      rainfallUmbrellaAudio.current.pause();
+      rainfallAudio.current?.pause();
+      rainfallUmbrellaAudio.current?.pause();
       onPlayingChange?.(false);
     }
   }, [playingElement, onPlayingChange]);

@@ -3,6 +3,7 @@ import {
   useAuth,
   useAppSelector,
   useAppDispatch,
+  refreshUser,
   completeTimer,
   restartTimer,
   addTimeToTimer,
@@ -14,14 +15,13 @@ import {
   toggleNotifications,
   setTimerStyle,
 } from '../store';
-import { useRouter } from '@tanstack/react-router';
+// import { useRouter } from '@tanstack/react-router';
 import { toast } from '../components/toast';
 import { PomodoroSettings } from '../components/PomodoroSettings';
 import { PomodoroTimer } from '../components/PomodoroTimer';
 import { fetchRandomWorldImage } from '../services/pexelsService';
 import { SoundscapePlayer } from '../components/SoundscapePlayer';
 import { TaskPanel } from '../components/TaskPanel';
-import { useTask } from '../hooks/useTask';
 import { cn } from '@/lib/utils';
 import {
   playStartSound,
@@ -30,7 +30,7 @@ import {
 } from '../utils/soundUtils';
 import { updateFavicon } from '../utils/dynamicFavicon';
 import { sessionApi } from '../api/client';
-import { Coffee, CheckCircle, Clock } from 'lucide-react';
+import { Coffee, CheckCircle, Clock, Zap } from 'lucide-react';
 import './AppShell.css';
 
 type TimerMode = 'focus' | 'break';
@@ -81,7 +81,7 @@ const saveTimerState = (state: TimerState) => {
 
 export default function AppShell() {
   const auth = useAuth();
-  const router = useRouter();
+  // const router = useRouter();
   const dispatch = useAppDispatch();
   const timerSettings = useAppSelector((state) => state.timerSettings);
 
@@ -102,6 +102,7 @@ export default function AppShell() {
     savedState?.secondsLeft ?? focusDuration * 60
   );
   const [isRunning, setIsRunning] = useState(savedState?.isRunning ?? false);
+  const [task, setTask] = useState(savedState?.task ?? '');
   const [completed, setCompleted] = useState(savedState?.completed ?? 0);
   const [totalFocusSec, setTotalFocusSec] = useState(
     savedState?.totalFocusSec ?? 0
@@ -111,14 +112,6 @@ export default function AppShell() {
   const intervalRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const sessionSavedRef = useRef<boolean>(false);
-  const {
-    tasks,
-    activeTask,
-    activeIndex,
-    setActiveIndex,
-    addTask,
-    removeTask,
-  } = useTask();
 
   // Initialize audio element
   useEffect(() => {
@@ -147,13 +140,13 @@ export default function AppShell() {
       mode,
       secondsLeft,
       isRunning,
-      task: activeTask,
+      task,
       completed,
       totalFocusSec,
       timestamp: Date.now(),
     };
     saveTimerState(state);
-  }, [mode, secondsLeft, isRunning, activeTask, completed, totalFocusSec]);
+  }, [mode, secondsLeft, isRunning, task, completed, totalFocusSec]);
 
   // Save timer settings to localStorage whenever they change
   useEffect(() => {
@@ -182,13 +175,6 @@ export default function AppShell() {
     timerSettings.notifications,
     timerSettings.timerStyle,
   ]);
-
-  // Load saved task if no tasks exist
-  useEffect(() => {
-    if (tasks.length === 0 && savedState?.task) {
-      addTask(savedState.task);
-    }
-  }, []);
 
   // Update secondsLeft when duration changes for the current mode
   useEffect(() => {
@@ -285,11 +271,11 @@ export default function AppShell() {
             if (mode === 'focus' && auth.user && !sessionSavedRef.current) {
               sessionSavedRef.current = true;
               sessionApi
-                .createSession(
-                  focusDuration,
-                  activeTask || undefined,
-                  focusDuration
-                )
+                .createSession(focusDuration, task || undefined, focusDuration)
+                .then(() => {
+                  // Refresh user data to get updated points
+                  dispatch(refreshUser());
+                })
                 .catch((err) => {
                   console.error('Failed to save focus session:', err);
                   toast.error('Failed to save session');
@@ -320,12 +306,6 @@ export default function AppShell() {
             const nextMode: TimerMode = mode === 'focus' ? 'break' : 'focus';
             const nextDuration =
               nextMode === 'focus' ? focusDuration * 60 : breakDuration * 60;
-
-            // If focus session completed and there are tasks, move to next task
-            if (mode === 'focus' && tasks.length > 0) {
-              const nextTaskIndex = (activeIndex + 1) % tasks.length;
-              setActiveIndex(nextTaskIndex);
-            }
 
             // Update mode (this will cause the effect to re-run with new dependencies)
             setMode(nextMode);
@@ -431,6 +411,16 @@ export default function AppShell() {
           <div className="stats-item__label">{completed}</div>
         </div>
 
+        {/* User Points */}
+        {auth.user && (
+          <div className="stats-item">
+            <div className="stats-item__icon">
+              <Zap size={24} className="text-yellow-400" />
+            </div>
+            <div className="stats-item__label">{auth.user.points || 0}</div>
+          </div>
+        )}
+
         {/* Total Time */}
         <div className="stats-item">
           <div className="stats-item__icon">
@@ -444,14 +434,13 @@ export default function AppShell() {
         {/* Task Panel */}
         <div className="stats-item">
           <TaskPanel
-            tasks={tasks}
-            activeIndex={activeIndex}
-            onAddTask={addTask}
-            onRemoveTask={removeTask}
-            onSetActiveTask={setActiveIndex}
-            showLabel={false}
+            onTaskComplete={(task) => {
+              toast.success(
+                `Task completed: ${task.title}! +${task.rewardPoints} pts`
+              );
+            }}
           />
-          <div className="stats-item__label">{activeTask || 'Task'}</div>
+          <div className="stats-item__label">Tasks</div>
         </div>
 
         {/* Music Player */}
@@ -483,14 +472,8 @@ export default function AppShell() {
             isRunning={isRunning}
             onStart={handleStart}
             onPause={handlePause}
-            task={activeTask}
-            onTaskChange={(newTask) => {
-              if (tasks.length > 0) {
-                addTask(newTask);
-              } else {
-                addTask(newTask);
-              }
-            }}
+            task={task}
+            onTaskChange={setTask}
             variant={variant}
             secondsLeft={secondsLeft}
             totalSeconds={

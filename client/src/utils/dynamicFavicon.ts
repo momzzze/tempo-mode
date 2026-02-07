@@ -62,7 +62,7 @@ export function updateFavicon(options: {
   const {
     isRunning,
     secondsLeft = 0,
-    mode = 'focus',
+    // mode = 'focus',
     soundPlaying = false,
   } = options;
 

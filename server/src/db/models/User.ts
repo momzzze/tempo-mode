@@ -5,6 +5,7 @@ export type UserRow = {
   email: string;
   password_hash: string;
   plan: string;
+  points: number;
   created_at: string;
   updated_at: string;
 };
@@ -29,10 +30,17 @@ export class User {
     const res = await query<UserRow>(
       `INSERT INTO users (email, password_hash)
        VALUES ($1, $2)
-       RETURNING id, email, password_hash, plan, created_at, updated_at`,
+       RETURNING id, email, password_hash, plan, points, created_at, updated_at`,
       [email, passwordHash]
     );
     return new User(res.rows[0]);
+  }
+
+  static async addPoints(userId: string, amount: number): Promise<void> {
+    await query('UPDATE users SET points = points + $1 WHERE id = $2', [
+      amount,
+      userId,
+    ]);
   }
 
   toSafe() {

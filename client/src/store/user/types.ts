@@ -1,6 +1,7 @@
 export interface User {
   id: string;
   email: string;
+  points: number;
   createdAt?: string;
   token: string;
 }

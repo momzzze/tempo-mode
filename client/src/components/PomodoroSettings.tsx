@@ -48,21 +48,22 @@ export function PomodoroSettings({
   notifications,
   onNotificationsToggle,
 
-  timerStyle,
+  // timerStyle,
 
-  onStyleChange,
-  secondsLeft = 0,
-  totalSeconds = 1,
+  // onStyleChange,
+  // secondsLeft = 0,
+  // totalSeconds = 1,
 }: PomodoroSettingsProps) {
   // Reserved for future timer style switching
-  void timerStyle;
-  void onStyleChange;
+  // void timerStyle;
+  // void onStyleChange;
 
   const [isOpen, setIsOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{
     top?: number;
     bottom?: number;
     left?: number;
+    right?: number;
   }>({});
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -70,7 +71,7 @@ export function PomodoroSettings({
   const handleMenuToggle = () => {
     if (!isOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      const menuHeight = 400; // Approximate menu height
+      // const menuHeight = 400; // Approximate menu height
       const menuWidth = 280;
 
       const positioning: {

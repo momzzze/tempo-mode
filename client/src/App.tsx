@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, Link, useRouter } from '@tanstack/react-router';
+import { Outlet, Link } from '@tanstack/react-router';
 import { Home, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { fetchRandomWorldImage } from './services/pexelsService';
@@ -12,7 +12,7 @@ import {
 import { ProfileSection } from './components/ProfileSection';
 
 export default function App() {
-  const router = useRouter();
+  // const router = useRouter();
   const dispatch = useAppDispatch();
   const isAuthed = useAppSelector(selectIsAuthed);
 

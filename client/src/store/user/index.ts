@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { User, AuthStatus } from './types';
 import { authService } from '../../services/authService';
+import * as authApi from '../../api/auth';
 
 export interface UserState {
   user: User | null;
@@ -37,6 +38,20 @@ export const registerUser = createAsyncThunk<
     return await authService.register({ email, password });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Registration failed';
+    return rejectWithValue(message);
+  }
+});
+
+export const refreshUser = createAsyncThunk<
+  Omit<User, 'token'>,
+  void,
+  { rejectValue: string }
+>('user/refresh', async (_, { rejectWithValue }) => {
+  try {
+    return await authApi.getCurrentUser();
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : 'Failed to refresh user';
     return rejectWithValue(message);
   }
 });
@@ -94,6 +109,12 @@ const userSlice = createSlice({
         state.error =
           action.payload || action.error.message || 'Registration failed';
         state.user = null;
+      })
+      // Refresh user
+      .addCase(refreshUser.fulfilled, (state, action) => {
+        if (state.user) {
+          state.user = { ...state.user, ...action.payload };
+        }
       });
   },
 });

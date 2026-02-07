@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
+// import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Timer,
-  TimerHeader,
+  // TimerHeader,
   TimerModeSelector,
   TimerDigits,
   TimerControls,
@@ -37,15 +37,15 @@ export function PomodoroTimer({
   onStart,
   onPause,
   task,
-  onTaskChange,
+  // onTaskChange,
   variant,
   settingsSlot,
   secondsLeft = 0,
   totalSeconds = 1,
 }: PomodoroTimerProps) {
   const isHalo = variant === 'halo';
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [isClockHovered, setIsClockHovered] = React.useState(false);
+  const [_isHovered, setIsHovered] = React.useState(false);
+  const [_isClockHovered, setIsClockHovered] = React.useState(false);
   const hideClockTimeoutRef = React.useRef<number | null>(null);
 
   const handleClockEnter = () => {

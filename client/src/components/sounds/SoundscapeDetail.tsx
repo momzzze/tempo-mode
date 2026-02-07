@@ -51,7 +51,7 @@ export function SoundscapeDetail({
 
           {element.audioFiles && element.audioFiles.length > 0 ? (
             <div className="soundscape-detail__tracks">
-              {element.audioFiles.map((url, idx) => {
+              {element.audioFiles.map((_, idx) => {
                 const trackNames = ['Ambiance', 'Medium Rain'];
                 return (
                   <div key={idx} className="soundscape-detail__track">

@@ -18,9 +18,9 @@ export const store = configureStore({
 store.subscribe(() => {
   const state = store.getState();
   try {
-    // Persist only JWT token to localStorage (not full user object)
+    // Persist full user object (includes token, id, email)
     if (state.user.user?.token) {
-      localStorage.setItem(PERSIST_KEY, state.user.user.token);
+      localStorage.setItem(PERSIST_KEY, JSON.stringify(state.user.user));
     } else {
       localStorage.removeItem(PERSIST_KEY);
     }
@@ -72,7 +72,14 @@ export const selectAuthError = createSelector(
 export const useAuth = () => useAppSelector(selectAuthState);
 
 // Export actions
-export { loginUser, registerUser, logout, clearError, rehydrate } from './user';
+export {
+  loginUser,
+  registerUser,
+  refreshUser,
+  logout,
+  clearError,
+  rehydrate,
+} from './user';
 export type { User } from './user/types';
 export {
   setFocusDuration,

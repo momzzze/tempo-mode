@@ -16,3 +16,8 @@ export async function login(email: string, password: string): Promise<User> {
   );
   return { ...res.user, token: res.token };
 }
+
+export async function getCurrentUser(): Promise<Omit<User, 'token'>> {
+  const res = await api.get<{ user: Omit<User, 'token'> }>('/api/auth/me');
+  return res.user;
+}

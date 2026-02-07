@@ -1,9 +1,18 @@
 const baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
 
 function getToken(): string | null {
-  const token = localStorage.getItem('tempo-mode-auth');
-  // Token is stored as plain string, not JSON
-  return token && token.startsWith('eyJ') ? token : null;
+  const stored = localStorage.getItem('tempo-mode-auth');
+  if (!stored) return null;
+
+  // Backward-compat: token stored as plain string
+  if (stored.startsWith('eyJ')) return stored;
+
+  try {
+    const parsed = JSON.parse(stored) as { token?: string };
+    return parsed?.token ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -46,7 +55,13 @@ export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body: unknown) =>
     request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
+  put: <T>(path: string, body: unknown) =>
+    request<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
+  delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 };
+
+// Export as apiClient for compatibility
+export const apiClient = api;
 
 export const sessionApi = {
   createSession: (

@@ -1,5 +1,10 @@
 interface SoundscapeTabsProps {
-  tabs: Array<{ name: string; elements?: string[] }>;
+  tabs: Array<{
+    name: string;
+    elements?:
+      | string[]
+      | Array<{ name: string; audioFiles: string[]; icon: string }>;
+  }>;
   activeTab: string;
   onTabChange: (tabName: string) => void;
 }

@@ -1,4 +1,5 @@
 import { Session, SessionRow } from '../db/models/Session.js';
+import { User } from '../db/models/User.js';
 
 export interface StatsSummary {
   totalMinutes: number;
@@ -34,6 +35,11 @@ export class SessionService {
       label,
       actualMinutes
     );
+
+    // Award points: 1 point per minute of focus time completed
+    const minutesToAward = actualMinutes || plannedMinutes;
+    await User.addPoints(userId, minutesToAward);
+
     return session.row;
   }
 
