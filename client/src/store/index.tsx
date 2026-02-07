@@ -3,14 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
 import userReducer from './user';
 import timerSettingsReducer from './timerSettings';
+import timerStateReducer from './timerState';
 
 const PERSIST_KEY = 'tempo-mode-auth';
 const SETTINGS_KEY = 'tempo-mode-timer-settings';
+const TIMER_STATE_KEY = 'tempo-mode-timer-state';
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
     timerSettings: timerSettingsReducer,
+    timerState: timerStateReducer,
   },
 });
 
@@ -33,6 +36,9 @@ store.subscribe(() => {
       ...settingsToPersist
     } = state.timerSettings;
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settingsToPersist));
+
+    // Persist timer state
+    localStorage.setItem(TIMER_STATE_KEY, JSON.stringify(state.timerState));
   } catch {}
 });
 
@@ -93,3 +99,15 @@ export {
   addTimeToTimer,
   setTimerStyle,
 } from './timerSettings';
+export {
+  setMode,
+  setSecondsLeft,
+  decrementSecond,
+  startTimer,
+  pauseTimer,
+  setTask,
+  incrementCompleted,
+  addFocusTime,
+  resetTimer,
+} from './timerState';
+export type { TimerMode } from './timerState';

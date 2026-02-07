@@ -14,7 +14,17 @@ import {
   toggleHideSeconds,
   toggleNotifications,
   setTimerStyle,
+  setMode,
+  setSecondsLeft,
+  decrementSecond,
+  startTimer as startTimerAction,
+  pauseTimer as pauseTimerAction,
+  setTask as setTaskAction,
+  incrementCompleted,
+  addFocusTime,
+  resetTimer,
 } from '../store';
+import type { TimerMode } from '../store';
 // import { useRouter } from '@tanstack/react-router';
 import { toast } from '../components/toast';
 import { PomodoroSettings } from '../components/PomodoroSettings';
@@ -32,63 +42,15 @@ import { updateFavicon } from '../utils/dynamicFavicon';
 import { sessionApi } from '../api/client';
 import { Coffee, CheckCircle, Clock, Zap } from 'lucide-react';
 import './AppShell.css';
-
-type TimerMode = 'focus' | 'break';
-
-interface TimerState {
-  mode: TimerMode;
-  secondsLeft: number;
-  isRunning: boolean;
-  task: string;
-  completed: number;
-  totalFocusSec: number;
-  timestamp: number;
-}
-
-const STORAGE_KEY = 'tempo-mode-timer-state';
-
-const loadTimerState = (): Partial<TimerState> | null => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return null;
-    const state: TimerState = JSON.parse(saved);
-
-    // If timer was running, calculate elapsed time
-    if (state.isRunning && state.timestamp) {
-      const elapsed = Math.floor((Date.now() - state.timestamp) / 1000);
-      state.secondsLeft = Math.max(0, state.secondsLeft - elapsed);
-
-      // If time ran out while page was closed, stop the timer
-      if (state.secondsLeft === 0) {
-        state.isRunning = false;
-      }
-    }
-
-    return state;
-  } catch (e) {
-    console.error('Failed to load timer state:', e);
-    return null;
-  }
-};
-
-const saveTimerState = (state: TimerState) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch (e) {
-    console.error('Failed to save timer state:', e);
-  }
-};
+import type { TimerState } from '@/store/timerState';
 
 export default function AppShell() {
   const auth = useAuth();
-  // const router = useRouter();
   const dispatch = useAppDispatch();
   const timerSettings = useAppSelector((state) => state.timerSettings);
+  const timerState = useAppSelector((state) => state.timerState);
 
-  // Load saved state or use defaults
-  const savedState = loadTimerState();
-
-  // Timer state (using settings from store)
+  // Timer settings from store
   const focusDuration = timerSettings.focusDuration;
   const breakDuration = timerSettings.breakDuration;
   const autoStart = timerSettings.autoStart;
@@ -97,16 +59,14 @@ export default function AppShell() {
   const timerStyle = timerSettings.timerStyle;
   const soundEnabled = timerSettings.soundEnabled;
 
-  const [mode, setMode] = useState<TimerMode>(savedState?.mode ?? 'focus');
-  const [secondsLeft, setSecondsLeft] = useState<number>(
-    savedState?.secondsLeft ?? focusDuration * 60
-  );
-  const [isRunning, setIsRunning] = useState(savedState?.isRunning ?? false);
-  const [task, setTask] = useState(savedState?.task ?? '');
-  const [completed, setCompleted] = useState(savedState?.completed ?? 0);
-  const [totalFocusSec, setTotalFocusSec] = useState(
-    savedState?.totalFocusSec ?? 0
-  );
+  // Timer state from Redux
+  const mode = timerState.mode;
+  const secondsLeft = timerState.secondsLeft;
+  const isRunning = timerState.isRunning;
+  const task = timerState.task;
+  const completed = timerState.completed;
+  const totalFocusSec = timerState.totalFocusSec;
+
   const [soundscapePlaying, setSoundscapePlaying] = useState(false);
   const [soundscapeOpen, setSoundscapeOpen] = useState(false);
   const intervalRef = useRef<number | null>(null);
@@ -133,20 +93,6 @@ export default function AppShell() {
       (document.documentElement.dataset.layer as 'solid' | 'fog') || 'solid'
     );
   });
-
-  // Save timer state to localStorage whenever it changes
-  useEffect(() => {
-    const state: TimerState = {
-      mode,
-      secondsLeft,
-      isRunning,
-      task,
-      completed,
-      totalFocusSec,
-      timestamp: Date.now(),
-    };
-    saveTimerState(state);
-  }, [mode, secondsLeft, isRunning, task, completed, totalFocusSec]);
 
   // Save timer settings to localStorage whenever they change
   useEffect(() => {
@@ -211,10 +157,12 @@ export default function AppShell() {
   useEffect(() => {
     if (timerSettings.triggerComplete > 0) {
       handlePause();
-      setCompleted((c) => c + (mode === 'focus' ? 1 : 0));
-      if (mode === 'focus') setTotalFocusSec((t) => t + focusDuration * 60);
+      if (mode === 'focus') {
+        dispatch(incrementCompleted());
+        dispatch(addFocusTime(focusDuration * 60));
+      }
       toast.success('Session completed manually');
-      setSecondsLeft(getDuration(mode));
+      dispatch(setSecondsLeft(getDuration(mode)));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timerSettings.triggerComplete]);
@@ -222,17 +170,17 @@ export default function AppShell() {
   useEffect(() => {
     if (timerSettings.triggerRestart > 0) {
       handlePause();
-      setSecondsLeft(getDuration(mode));
+      dispatch(setSecondsLeft(getDuration(mode)));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timerSettings.triggerRestart]);
 
   useEffect(() => {
     if (timerSettings.triggerAddTime > 0) {
-      setSecondsLeft((prev) => prev + 10 * 60);
+      dispatch(setSecondsLeft(secondsLeft + 10 * 60));
       toast.info('Added 10 minutes');
     }
-  }, [timerSettings.triggerAddTime]);
+  }, [timerSettings.triggerAddTime, secondsLeft, dispatch]);
 
   // Load background image when layer changes to fog or timerStyle is halo
   useEffect(() => {
@@ -264,57 +212,60 @@ export default function AppShell() {
   useEffect(() => {
     if (isRunning) {
       intervalRef.current = window.setInterval(() => {
-        setSecondsLeft((prev) => {
-          if (prev <= 1) {
-            // Save focus session if mode is focus and user is authenticated
-            // Use ref to prevent duplicate saves during mode transition
-            if (mode === 'focus' && auth.user && !sessionSavedRef.current) {
-              sessionSavedRef.current = true;
-              sessionApi
-                .createSession(focusDuration, task || undefined, focusDuration)
-                .then(() => {
-                  // Refresh user data to get updated points
-                  dispatch(refreshUser());
-                })
-                .catch((err) => {
-                  console.error('Failed to save focus session:', err);
-                  toast.error('Failed to save session');
-                });
-            }
+        dispatch(decrementSecond());
 
-            // Update stats before transition
-            setCompleted((c) => c + (mode === 'focus' ? 1 : 0));
-            if (mode === 'focus')
-              setTotalFocusSec((t) => t + focusDuration * 60);
-
-            // Play sound if enabled
-            if (soundEnabled) {
-              playCompletionSound(audioRef.current);
-            }
-
-            // Show notification
-            toast.success(
-              `${mode === 'focus' ? 'Focus' : 'Break'} session complete`
-            );
-            if (notifications && 'Notification' in window) {
-              new Notification('TempoMode', {
-                body: `${mode === 'focus' ? 'Focus' : 'Break'} session complete!`,
+        if (secondsLeft <= 1) {
+          // Save focus session if mode is focus and user is authenticated
+          // Use ref to prevent duplicate saves during mode transition
+          if (mode === 'focus' && auth.user && !sessionSavedRef.current) {
+            sessionSavedRef.current = true;
+            sessionApi
+              .createSession(focusDuration, task || undefined, focusDuration)
+              .then(() => {
+                // Refresh user data to get updated points
+                dispatch(refreshUser());
+              })
+              .catch((err) => {
+                console.error('Failed to save focus session:', err);
+                toast.error('Failed to save session');
               });
-            }
-
-            // Auto-transition to next mode and set duration
-            const nextMode: TimerMode = mode === 'focus' ? 'break' : 'focus';
-            const nextDuration =
-              nextMode === 'focus' ? focusDuration * 60 : breakDuration * 60;
-
-            // Update mode (this will cause the effect to re-run with new dependencies)
-            setMode(nextMode);
-
-            // Set the next duration and continue if autoStart is true
-            return nextDuration;
           }
-          return prev - 1;
-        });
+
+          // Update stats before transition
+          if (mode === 'focus') {
+            dispatch(incrementCompleted());
+            dispatch(addFocusTime(focusDuration * 60));
+          }
+
+          // Play sound if enabled
+          if (soundEnabled) {
+            playCompletionSound(audioRef.current);
+          }
+
+          // Show notification
+          toast.success(
+            `${mode === 'focus' ? 'Focus' : 'Break'} session complete`
+          );
+          if (notifications && 'Notification' in window) {
+            new Notification('TempoMode', {
+              body: `${mode === 'focus' ? 'Focus' : 'Break'} session complete!`,
+            });
+          }
+
+          // Auto-transition to next mode and set duration
+          const nextMode: TimerMode = mode === 'focus' ? 'break' : 'focus';
+          const nextDuration =
+            nextMode === 'focus' ? focusDuration * 60 : breakDuration * 60;
+
+          // Update mode and duration
+          dispatch(setMode(nextMode));
+          dispatch(setSecondsLeft(nextDuration));
+
+          // Auto-start if enabled
+          if (!autoStart) {
+            dispatch(pauseTimerAction());
+          }
+        }
       }, 1000);
     }
     return () => {
@@ -325,11 +276,16 @@ export default function AppShell() {
     };
   }, [
     isRunning,
+    secondsLeft,
     mode,
     focusDuration,
     breakDuration,
     notifications,
     soundEnabled,
+    autoStart,
+    auth.user,
+    task,
+    dispatch,
   ]);
 
   const getDuration = (m: TimerMode) => {
@@ -355,7 +311,7 @@ export default function AppShell() {
     if (mode === 'focus') {
       sessionSavedRef.current = false;
     }
-    setIsRunning(true);
+    dispatch(startTimerAction());
   };
 
   const handlePause = () => {
@@ -363,7 +319,7 @@ export default function AppShell() {
     if (soundEnabled) {
       playPauseSound();
     }
-    setIsRunning(false);
+    dispatch(pauseTimerAction());
     if (intervalRef.current) {
       window.clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -372,8 +328,8 @@ export default function AppShell() {
 
   const switchMode = (next: TimerMode) => {
     handlePause();
-    setMode(next);
-    setSecondsLeft(getDuration(next));
+    dispatch(setMode(next));
+    dispatch(setSecondsLeft(getDuration(next)));
     // Reset session saved flag when switching to focus mode
     if (next === 'focus') {
       sessionSavedRef.current = false;
@@ -389,26 +345,22 @@ export default function AppShell() {
     <div className="flex flex-col">
       {/* Stats bar */}
       <div className="absolute top-16 left-0 right-0 z-30 stats-bar">
-        {/* Mode */}
-        <div className="stats-item">
-          <div className="stats-item__icon">
-            {mode === 'focus' ? (
-              <span className="text-2xl">🎯</span>
-            ) : (
-              <Coffee size={24} />
-            )}
-          </div>
-          <div className="stats-item__label">
-            {mode === 'focus' ? 'Focus' : 'Break'}
-          </div>
-        </div>
-
         {/* Completed */}
         <div className="stats-item">
           <div className="stats-item__icon">
             <CheckCircle size={24} />
           </div>
           <div className="stats-item__label">{completed}</div>
+        </div>
+
+        {/* Total Time */}
+        <div className="stats-item">
+          <div className="stats-item__icon">
+            <Clock size={24} />
+          </div>
+          <div className="stats-item__label">
+            {Math.floor(totalFocusSec / 60)}m
+          </div>
         </div>
 
         {/* User Points */}
@@ -420,16 +372,6 @@ export default function AppShell() {
             <div className="stats-item__label">{auth.user.points || 0}</div>
           </div>
         )}
-
-        {/* Total Time */}
-        <div className="stats-item">
-          <div className="stats-item__icon">
-            <Clock size={24} />
-          </div>
-          <div className="stats-item__label">
-            {Math.floor(totalFocusSec / 60)}m
-          </div>
-        </div>
 
         {/* Task Panel */}
         <div className="stats-item">
@@ -473,7 +415,7 @@ export default function AppShell() {
             onStart={handleStart}
             onPause={handlePause}
             task={task}
-            onTaskChange={setTask}
+            onTaskChange={(newTask) => dispatch(setTaskAction(newTask))}
             variant={variant}
             secondsLeft={secondsLeft}
             totalSeconds={
