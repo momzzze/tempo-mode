@@ -91,16 +91,13 @@ export function PomodoroTimer({
         <div className="relative z-10 w-full h-full grid place-items-center">
           {/* Tabs near top inside ring */}
           <TimerModeSelector className="absolute top-[22%] left-1/2 -translate-x-1/2">
-            <Tabs
-              value={mode}
-              onValueChange={(val) => onModeChange(val as 'focus' | 'break')}
-              className="w-auto"
-            >
+            <Tabs value={mode} className="w-auto">
               <TabsList className="pomodoro-timer__tabs-list bg-transparent p-0 h-auto gap-8">
                 <div className="flex gap-10 relative">
                   <div>
                     <TabsTrigger
                       value="focus"
+                      onClick={() => onModeChange('focus')}
                       className={cn(
                         'p-0 h-auto bg-transparent shadow-none rounded-none',
                         'uppercase tracking-widest text-sm font-semibold',
@@ -115,6 +112,7 @@ export function PomodoroTimer({
                   <div>
                     <TabsTrigger
                       value="break"
+                      onClick={() => onModeChange('break')}
                       className={cn(
                         'p-0 h-auto bg-transparent shadow-none rounded-none',
                         'uppercase tracking-widest text-sm font-semibold',

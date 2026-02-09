@@ -5,7 +5,6 @@ interface TimerSettingsState {
   focusDuration: number;
   breakDuration: number;
   soundEnabled: boolean;
-  autoStart: boolean;
   hideSeconds: boolean;
   notifications: boolean;
   triggerComplete: number; // Increment to trigger complete
@@ -32,7 +31,6 @@ const initialState: TimerSettingsState = {
   focusDuration: savedSettings.focusDuration ?? 25,
   breakDuration: savedSettings.breakDuration ?? 5,
   soundEnabled: savedSettings.soundEnabled ?? false,
-  autoStart: savedSettings.autoStart ?? false,
   hideSeconds: savedSettings.hideSeconds ?? false,
   notifications: savedSettings.notifications ?? false,
   triggerComplete: 0,
@@ -53,9 +51,6 @@ const timerSettingsSlice = createSlice({
     },
     toggleSound: (state) => {
       state.soundEnabled = !state.soundEnabled;
-    },
-    toggleAutoStart: (state) => {
-      state.autoStart = !state.autoStart;
     },
     toggleHideSeconds: (state) => {
       state.hideSeconds = !state.hideSeconds;
@@ -82,7 +77,6 @@ export const {
   setFocusDuration,
   setBreakDuration,
   toggleSound,
-  toggleAutoStart,
   toggleHideSeconds,
   toggleNotifications,
   completeTimer,

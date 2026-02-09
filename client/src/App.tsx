@@ -3,17 +3,11 @@ import { Outlet, Link } from '@tanstack/react-router';
 import { Home, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { fetchRandomWorldImage } from './services/pexelsService';
-import {
-  useAppDispatch,
-  useAppSelector,
-  selectIsAuthed,
-  rehydrate,
-} from './store';
+import { useAppSelector, selectIsAuthed } from './store';
 import { ProfileSection } from './components/ProfileSection';
 
 export default function App() {
   // const router = useRouter();
-  const dispatch = useAppDispatch();
   const isAuthed = useAppSelector(selectIsAuthed);
 
   // Background image state
@@ -24,13 +18,7 @@ export default function App() {
     fetchRandomWorldImage().then(setBackgroundUrl);
   }, []);
 
-  // Rehydrate auth from localStorage on mount
-  useEffect(() => {
-    const token = localStorage.getItem('tempo-mode-auth');
-    if (token) {
-      dispatch(rehydrate({ token } as any));
-    }
-  }, [dispatch]);
+  // NOTE: Rehydration is handled in main.tsx - do NOT duplicate here!
 
   return (
     <div className="relative min-h-screen text-white">

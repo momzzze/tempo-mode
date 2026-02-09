@@ -32,6 +32,7 @@ const tagElements = [
 export interface SoundscapePlayerProps {
   timerMode?: 'focus' | 'break';
   isRunning?: boolean;
+  soundUnlocked?: boolean;
   onPlayingChange?: (isPlaying: boolean) => void;
   onOpenChange?: (isOpen: boolean) => void;
 }
@@ -39,6 +40,7 @@ export interface SoundscapePlayerProps {
 export function SoundscapePlayer({
   timerMode = 'focus',
   isRunning = false,
+  soundUnlocked = true,
   onPlayingChange,
   onOpenChange,
 }: SoundscapePlayerProps) {
@@ -55,7 +57,7 @@ export function SoundscapePlayer({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
 
-  // Load last played soundscape from localStorage on mount
+  // Load last played soundscape and volumes from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('lastPlayedSoundscape');
     if (saved) {
@@ -65,6 +67,17 @@ export function SoundscapePlayer({
       if (element) {
         console.log('📝 Loaded last soundscape:', saved);
         setSelectedElement(element);
+      }
+    }
+
+    // Load volumes from localStorage
+    const savedVolumes = localStorage.getItem('rainfallVolumes');
+    if (savedVolumes) {
+      try {
+        const volumes = JSON.parse(savedVolumes);
+        setRainfallVolumes(volumes);
+      } catch (e) {
+        console.error('Failed to load volumes:', e);
       }
     }
   }, []);
@@ -128,6 +141,9 @@ export function SoundscapePlayer({
     newVolumes[index] = value;
     setRainfallVolumes(newVolumes);
 
+    // Save to localStorage
+    localStorage.setItem('rainfallVolumes', JSON.stringify(newVolumes));
+
     // Apply volume to audio element
     if (index === 0 && rainfallAudio.current) {
       rainfallAudio.current.volume = value;
@@ -136,9 +152,24 @@ export function SoundscapePlayer({
     }
   };
 
+  // Apply volumes to audio elements whenever they change
+  useEffect(() => {
+    if (rainfallAudio.current) {
+      rainfallAudio.current.volume = rainfallVolumes[0];
+    }
+    if (rainfallUmbrellaAudio.current) {
+      rainfallUmbrellaAudio.current.volume = rainfallVolumes[1];
+    }
+  }, [rainfallVolumes]);
+
   // Simple play/pause effect
   useEffect(() => {
-    console.log('🎵 playingElement:', playingElement?.name);
+    console.log(
+      '🎵 playingElement:',
+      playingElement?.name,
+      'soundUnlocked:',
+      soundUnlocked
+    );
     if (!rainfallAudio.current) {
       console.log('❌ Audio element not found');
       return;
@@ -148,6 +179,12 @@ export function SoundscapePlayer({
     console.log('📍 Audio readyState:', rainfallAudio.current.readyState);
 
     if (playingElement?.name === 'Rainfall') {
+      // Check if sound is unlocked (browser autoplay policy)
+      if (!soundUnlocked) {
+        console.log('🔇 Rainfall playback blocked - waiting for sound unlock');
+        return;
+      }
+
       console.log('▶️ Playing rainfall');
       if (rainfallAudio.current) rainfallAudio.current.currentTime = 0;
       if (rainfallUmbrellaAudio.current)
@@ -169,7 +206,7 @@ export function SoundscapePlayer({
       rainfallUmbrellaAudio.current?.pause();
       onPlayingChange?.(false);
     }
-  }, [playingElement, onPlayingChange]);
+  }, [playingElement, soundUnlocked, onPlayingChange]);
 
   useLayoutEffect(() => {
     if (!isOpen) return;

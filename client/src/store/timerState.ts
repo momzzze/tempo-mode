@@ -18,7 +18,10 @@ const STORAGE_KEY = 'tempo-mode-timer-state';
 const loadInitialState = (): TimerState => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
+    console.log('⏱️ Loading timer state from localStorage:', saved);
+
     if (!saved) {
+      console.log('⏱️ No saved state, using defaults');
       return {
         mode: 'focus',
         secondsLeft: 25 * 60,
@@ -31,17 +34,39 @@ const loadInitialState = (): TimerState => {
     }
 
     const state: TimerState = JSON.parse(saved);
+    console.log('⏱️ Parsed state:', {
+      mode: state.mode,
+      secondsLeft: state.secondsLeft,
+      isRunning: state.isRunning,
+      timestamp: state.timestamp,
+    });
 
     // If timer was running, calculate elapsed time
     if (state.isRunning && state.timestamp) {
       const elapsed = Math.floor((Date.now() - state.timestamp) / 1000);
+      const oldSecondsLeft = state.secondsLeft;
       state.secondsLeft = Math.max(0, state.secondsLeft - elapsed);
+
+      console.log('⏱️ Timer was running - elapsed:', elapsed, 'seconds');
+      console.log(
+        '⏱️ Adjusted secondsLeft:',
+        oldSecondsLeft,
+        '->',
+        state.secondsLeft
+      );
 
       // If time ran out while page was closed, stop the timer
       if (state.secondsLeft === 0) {
         state.isRunning = false;
+        console.log('⏱️ Timer ran out, stopping');
       }
     }
+
+    console.log('⏱️ Final state:', {
+      mode: state.mode,
+      secondsLeft: state.secondsLeft,
+      isRunning: state.isRunning,
+    });
 
     return state;
   } catch (e) {
@@ -65,9 +90,16 @@ const timerStateSlice = createSlice({
   initialState,
   reducers: {
     setMode: (state, action: PayloadAction<TimerMode>) => {
+      console.log('🎯 setMode reducer - new mode:', action.payload);
       state.mode = action.payload;
     },
     setSecondsLeft: (state, action: PayloadAction<number>) => {
+      console.log(
+        '⏱️ setSecondsLeft reducer - new seconds:',
+        action.payload,
+        'isRunning:',
+        state.isRunning
+      );
       state.secondsLeft = action.payload;
       state.timestamp = Date.now();
     },
@@ -78,10 +110,12 @@ const timerStateSlice = createSlice({
       state.timestamp = Date.now();
     },
     startTimer: (state) => {
+      console.log('▶️ startTimer reducer called - setting isRunning to true');
       state.isRunning = true;
       state.timestamp = Date.now();
     },
     pauseTimer: (state) => {
+      console.log('⏸️ pauseTimer reducer called - setting isRunning to false');
       state.isRunning = false;
       state.timestamp = Date.now();
     },
@@ -95,6 +129,7 @@ const timerStateSlice = createSlice({
       state.totalFocusSec += action.payload;
     },
     resetTimer: (state, action: PayloadAction<{ duration: number }>) => {
+      console.log('🔄 resetTimer reducer called - setting isRunning to false');
       state.secondsLeft = action.payload.duration;
       state.isRunning = false;
       state.timestamp = Date.now();

@@ -28,7 +28,17 @@ function decodeJwtPayload(token: string): { sub?: string; email?: string } {
 try {
   const stored = localStorage.getItem('tempo-mode-auth');
   if (stored) {
+    console.log('🔄 Rehydrating auth from localStorage');
+
+    // Check for corrupted nested JSON (old bug)
+    if (stored.includes('{\\')) {
+      console.warn('⚠️ Detected corrupted localStorage, clearing...');
+      localStorage.removeItem('tempo-mode-auth');
+      throw new Error('Corrupted data');
+    }
+
     if (stored.startsWith('eyJ')) {
+      // Old format: just the JWT token
       const payload = decodeJwtPayload(stored);
       const user = {
         id: payload.sub ?? '',
@@ -37,13 +47,25 @@ try {
       } as User;
       store.dispatch(rehydrate(user));
     } else {
+      // New format: full user object
       const user = JSON.parse(stored) as User;
+
+      // Validate token is not nested
+      if (typeof user.token !== 'string' || !user.token.startsWith('eyJ')) {
+        console.warn('⚠️ Invalid token format, clearing...');
+        localStorage.removeItem('tempo-mode-auth');
+        throw new Error('Invalid token');
+      }
+
       store.dispatch(rehydrate(user));
     }
+    console.log('✅ Auth rehydrated successfully');
   }
   // Clear old keys
   localStorage.removeItem('tempo-mode-auth-v1');
-} catch {}
+} catch (e) {
+  console.error('Failed to rehydrate auth:', e);
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

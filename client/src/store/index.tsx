@@ -18,12 +18,29 @@ export const store = configureStore({
 });
 
 // Persist middleware
+const isRehydrating = false;
+
 store.subscribe(() => {
+  // Skip persistence during initial rehydration to prevent double-save
+  if (isRehydrating) {
+    return;
+  }
+
   const state = store.getState();
   try {
     // Persist full user object (includes token, id, email)
     if (state.user.user?.token) {
-      localStorage.setItem(PERSIST_KEY, JSON.stringify(state.user.user));
+      const userData = state.user.user;
+
+      // Validate: token should be a JWT string, not a nested object
+      if (
+        typeof userData.token === 'string' &&
+        userData.token.startsWith('eyJ')
+      ) {
+        localStorage.setItem(PERSIST_KEY, JSON.stringify(userData));
+      } else {
+        console.error('❌ Invalid token format detected, skipping save');
+      }
     } else {
       localStorage.removeItem(PERSIST_KEY);
     }
@@ -38,8 +55,16 @@ store.subscribe(() => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settingsToPersist));
 
     // Persist timer state
+    console.log('💾 Saving timer state to localStorage:', {
+      mode: state.timerState.mode,
+      secondsLeft: state.timerState.secondsLeft,
+      isRunning: state.timerState.isRunning,
+      timestamp: state.timerState.timestamp,
+    });
     localStorage.setItem(TIMER_STATE_KEY, JSON.stringify(state.timerState));
-  } catch {}
+  } catch (e) {
+    console.error('Failed to persist state:', e);
+  }
 });
 
 export type RootState = ReturnType<typeof store.getState>;
@@ -91,7 +116,6 @@ export {
   setFocusDuration,
   setBreakDuration,
   toggleSound,
-  toggleAutoStart,
   toggleHideSeconds,
   toggleNotifications,
   completeTimer,

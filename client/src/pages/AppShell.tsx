@@ -10,19 +10,16 @@ import {
   setFocusDuration,
   setBreakDuration,
   toggleSound,
-  toggleAutoStart,
   toggleHideSeconds,
   toggleNotifications,
   setTimerStyle,
   setMode,
   setSecondsLeft,
-  decrementSecond,
   startTimer as startTimerAction,
   pauseTimer as pauseTimerAction,
   setTask as setTaskAction,
   incrementCompleted,
   addFocusTime,
-  resetTimer,
 } from '../store';
 import type { TimerMode } from '../store';
 // import { useRouter } from '@tanstack/react-router';
@@ -42,7 +39,6 @@ import { updateFavicon } from '../utils/dynamicFavicon';
 import { sessionApi } from '../api/client';
 import { Coffee, CheckCircle, Clock, Zap } from 'lucide-react';
 import './AppShell.css';
-import type { TimerState } from '@/store/timerState';
 
 export default function AppShell() {
   const auth = useAuth();
@@ -53,7 +49,6 @@ export default function AppShell() {
   // Timer settings from store
   const focusDuration = timerSettings.focusDuration;
   const breakDuration = timerSettings.breakDuration;
-  const autoStart = timerSettings.autoStart;
   const hideSeconds = timerSettings.hideSeconds;
   const notifications = timerSettings.notifications;
   const timerStyle = timerSettings.timerStyle;
@@ -72,6 +67,40 @@ export default function AppShell() {
   const intervalRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const sessionSavedRef = useRef<boolean>(false);
+  const isInitialMount = useRef(true);
+  const pendingCompletionRef = useRef(false);
+  const [soundUnlocked, setSoundUnlocked] = useState(false);
+
+  // Unlock sound on first user gesture (needed after page refresh for browser autoplay policy)
+  const unlockSound = async (): Promise<boolean> => {
+    try {
+      const a = audioRef.current;
+      if (!a) return false;
+
+      // Prime the audio element with near-silent play/pause
+      a.volume = 0.0001;
+      await a.play();
+      a.pause();
+      a.currentTime = 0;
+      a.volume = 1;
+
+      setSoundUnlocked(true);
+      console.log('🔊 Sound unlocked after user gesture');
+
+      // If completion sound was queued while locked, play it now
+      if (pendingCompletionRef.current && soundEnabled) {
+        pendingCompletionRef.current = false;
+        playCompletionSound(audioRef.current);
+        console.log('🔔 Playing queued completion sound');
+      }
+
+      return true;
+    } catch (err) {
+      console.warn('Sound unlock failed (no user gesture yet):', err);
+      setSoundUnlocked(false);
+      return false;
+    }
+  };
 
   // Initialize audio element
   useEffect(() => {
@@ -84,6 +113,44 @@ export default function AppShell() {
       }
     };
   }, []);
+
+  // Auto-unlock sound on first user interaction (after refresh)
+  // This solves browser autoplay policy blocking sounds after page reload
+  useEffect(() => {
+    if (!soundEnabled || soundUnlocked) return;
+
+    const onFirstGesture = () => {
+      unlockSound();
+      window.removeEventListener('pointerdown', onFirstGesture);
+      window.removeEventListener('keydown', onFirstGesture);
+    };
+
+    window.addEventListener('pointerdown', onFirstGesture, { passive: true });
+    window.addEventListener('keydown', onFirstGesture, { passive: true });
+
+    return () => {
+      window.removeEventListener('pointerdown', onFirstGesture);
+      window.removeEventListener('keydown', onFirstGesture);
+    };
+  }, [soundEnabled, soundUnlocked]);
+
+  // Detect if timer was restored from localStorage in running state
+  // In this case, sound needs to be unlocked with user gesture
+  useEffect(() => {
+    // Only run once on mount
+    if (!isInitialMount.current) return;
+
+    if (isRunning && soundEnabled) {
+      setSoundUnlocked(false);
+      console.log(
+        '⏱️ Timer restored in running state - sound requires user gesture to unlock'
+      );
+    } else if (soundEnabled) {
+      // If timer not running but sound enabled, assume first session - mark as unlocked
+      setSoundUnlocked(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only on mount
 
   // Background image state
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
@@ -103,7 +170,6 @@ export default function AppShell() {
           focusDuration: timerSettings.focusDuration,
           breakDuration: timerSettings.breakDuration,
           soundEnabled: timerSettings.soundEnabled,
-          autoStart: timerSettings.autoStart,
           hideSeconds: timerSettings.hideSeconds,
           notifications: timerSettings.notifications,
           timerStyle: timerSettings.timerStyle,
@@ -116,21 +182,48 @@ export default function AppShell() {
     timerSettings.focusDuration,
     timerSettings.breakDuration,
     timerSettings.soundEnabled,
-    timerSettings.autoStart,
     timerSettings.hideSeconds,
     timerSettings.notifications,
     timerSettings.timerStyle,
   ]);
 
-  // Update secondsLeft when duration changes for the current mode
+  // Update secondsLeft when duration settings or mode changes
+  // BUT: Skip on initial mount to preserve state from localStorage
+  // NOTE: Do NOT include isRunning in deps - we check its value but don't want to reset on pause!
   useEffect(() => {
+    console.log(
+      '⚙️ Duration/mode effect - isRunning:',
+      isRunning,
+      'mode:',
+      mode,
+      'isInitialMount:',
+      isInitialMount.current
+    );
+
+    // Skip on initial mount to preserve localStorage state
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      console.log(
+        '⚙️ Initial mount - skipping secondsLeft update to preserve localStorage'
+      );
+      return;
+    }
+
+    // Only update duration if timer is NOT running
+    // We read isRunning but it's NOT in dependencies - this only triggers on focusDuration/breakDuration/mode changes
     if (!isRunning) {
-      // Only update if timer is not running
       const newDuration =
         mode === 'focus' ? focusDuration * 60 : breakDuration * 60;
-      setSecondsLeft(newDuration);
+      console.log('⚙️ Timer not running, setting duration to:', newDuration);
+      dispatch(setSecondsLeft(newDuration));
+    } else {
+      console.log(
+        '⚙️ Timer is running, keeping current secondsLeft:',
+        secondsLeft
+      );
     }
-  }, [focusDuration, breakDuration, mode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusDuration, breakDuration, mode, dispatch]);
 
   // Update favicon based on timer state
   useEffect(() => {
@@ -142,18 +235,6 @@ export default function AppShell() {
     });
   }, [isRunning, secondsLeft, mode, soundscapePlaying]);
 
-  // Auto-continue timer on mode transition if autoStart is enabled
-  useEffect(() => {
-    if (autoStart && !isRunning && secondsLeft > 0) {
-      // Small delay to ensure mode transition is complete
-      const timer = setTimeout(() => {
-        setIsRunning(true);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [mode, autoStart]);
-
-  // Handle timer actions from header menu
   useEffect(() => {
     if (timerSettings.triggerComplete > 0) {
       handlePause();
@@ -209,68 +290,91 @@ export default function AppShell() {
     return () => observer.disconnect();
   }, [backgroundUrl, timerStyle]);
 
+  // Main timer loop driven by current state to avoid stale closures
   useEffect(() => {
-    if (isRunning) {
-      intervalRef.current = window.setInterval(() => {
-        dispatch(decrementSecond());
+    console.log(
+      '🔄 Timer loop effect - isRunning:',
+      isRunning,
+      'secondsLeft:',
+      secondsLeft
+    );
 
-        if (secondsLeft <= 1) {
-          // Save focus session if mode is focus and user is authenticated
-          // Use ref to prevent duplicate saves during mode transition
-          if (mode === 'focus' && auth.user && !sessionSavedRef.current) {
-            sessionSavedRef.current = true;
-            sessionApi
-              .createSession(focusDuration, task || undefined, focusDuration)
-              .then(() => {
-                // Refresh user data to get updated points
-                dispatch(refreshUser());
-              })
-              .catch((err) => {
-                console.error('Failed to save focus session:', err);
-                toast.error('Failed to save session');
-              });
-          }
-
-          // Update stats before transition
-          if (mode === 'focus') {
-            dispatch(incrementCompleted());
-            dispatch(addFocusTime(focusDuration * 60));
-          }
-
-          // Play sound if enabled
-          if (soundEnabled) {
-            playCompletionSound(audioRef.current);
-          }
-
-          // Show notification
-          toast.success(
-            `${mode === 'focus' ? 'Focus' : 'Break'} session complete`
-          );
-          if (notifications && 'Notification' in window) {
-            new Notification('TempoMode', {
-              body: `${mode === 'focus' ? 'Focus' : 'Break'} session complete!`,
-            });
-          }
-
-          // Auto-transition to next mode and set duration
-          const nextMode: TimerMode = mode === 'focus' ? 'break' : 'focus';
-          const nextDuration =
-            nextMode === 'focus' ? focusDuration * 60 : breakDuration * 60;
-
-          // Update mode and duration
-          dispatch(setMode(nextMode));
-          dispatch(setSecondsLeft(nextDuration));
-
-          // Auto-start if enabled
-          if (!autoStart) {
-            dispatch(pauseTimerAction());
-          }
-        }
-      }, 1000);
+    if (!isRunning) {
+      if (intervalRef.current) {
+        window.clearTimeout(intervalRef.current);
+        intervalRef.current = null;
+      }
+      console.log('⏸️ Timer not running, clearing timeout');
+      return;
     }
+
+    if (secondsLeft <= 0) {
+      // Save focus session if mode is focus and user is authenticated
+      if (mode === 'focus' && auth.user && !sessionSavedRef.current) {
+        sessionSavedRef.current = true;
+        sessionApi
+          .createSession(focusDuration, task || undefined, focusDuration)
+          .then(() => {
+            dispatch(refreshUser());
+          })
+          .catch((err) => {
+            console.error('Failed to save focus session:', err);
+            toast.error('Failed to save session');
+          });
+      }
+
+      // Update stats before transition
+      if (mode === 'focus') {
+        dispatch(incrementCompleted());
+        dispatch(addFocusTime(focusDuration * 60));
+      }
+
+      // Play sound if enabled and unlocked (browser autoplay policy)
+      // If not unlocked, queue it to play when user unlocks
+      if (soundEnabled && soundUnlocked) {
+        playCompletionSound(audioRef.current);
+      } else if (soundEnabled && !soundUnlocked) {
+        console.log(
+          '🔇 Completion sound blocked - queueing for when sound unlocks'
+        );
+        pendingCompletionRef.current = true;
+      }
+
+      // Show notification
+      toast.success(`${mode === 'focus' ? 'Focus' : 'Break'} session complete`);
+      if (notifications && 'Notification' in window) {
+        new Notification('TempoMode', {
+          body: `${mode === 'focus' ? 'Focus' : 'Break'} session complete!`,
+        });
+      }
+
+      // Determine next mode
+      const nextMode: TimerMode = mode === 'focus' ? 'break' : 'focus';
+      const nextDuration =
+        nextMode === 'focus' ? focusDuration * 60 : breakDuration * 60;
+
+      // Reset session saved flag when switching to focus mode
+      if (nextMode === 'focus') {
+        sessionSavedRef.current = false;
+      }
+
+      // Transition to next mode
+      dispatch(setMode(nextMode));
+      dispatch(setSecondsLeft(nextDuration));
+
+      // Continue running into the next session
+      dispatch(startTimerAction());
+
+      return;
+    }
+
+    intervalRef.current = window.setTimeout(() => {
+      dispatch(setSecondsLeft(secondsLeft - 1));
+    }, 1000);
+
     return () => {
       if (intervalRef.current) {
-        window.clearInterval(intervalRef.current);
+        window.clearTimeout(intervalRef.current);
         intervalRef.current = null;
       }
     };
@@ -282,7 +386,6 @@ export default function AppShell() {
     breakDuration,
     notifications,
     soundEnabled,
-    autoStart,
     auth.user,
     task,
     dispatch,
@@ -301,35 +404,68 @@ export default function AppShell() {
     return hideSeconds ? `${m}` : `${m}:${s}`;
   }, [secondsLeft, hideSeconds]);
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (isRunning) return;
-    console.log('Start clicked - soundEnabled:', soundEnabled);
-    if (soundEnabled) {
+    console.log('▶️ handleStart called');
+
+    // Unlock sound if needed (Fix 1: guaranteed unlock on Start click)
+    if (soundEnabled && !soundUnlocked) {
+      console.log('🔊 Unlocking sound on Start click...');
+      await unlockSound();
+    }
+
+    // Now safe to play sound
+    if (soundEnabled && soundUnlocked) {
       playStartSound();
     }
+
     // Reset session saved flag when starting a new session
     if (mode === 'focus') {
       sessionSavedRef.current = false;
     }
     dispatch(startTimerAction());
+    console.log('▶️ startTimerAction dispatched');
   };
 
-  const handlePause = () => {
-    console.log('Pause clicked - soundEnabled:', soundEnabled);
-    if (soundEnabled) {
+  const handlePause = async () => {
+    console.log('⏸️ handlePause called');
+
+    // Optionally unlock sound on Pause click (Fix 1 variant)
+    if (soundEnabled && !soundUnlocked) {
+      console.log('🔊 Unlocking sound on Pause click...');
+      await unlockSound();
+    }
+
+    // Now safe to play sound
+    if (soundEnabled && soundUnlocked) {
       playPauseSound();
     }
+
     dispatch(pauseTimerAction());
+    console.log('⏸️ pauseTimerAction dispatched');
     if (intervalRef.current) {
-      window.clearInterval(intervalRef.current);
+      window.clearTimeout(intervalRef.current);
       intervalRef.current = null;
     }
   };
 
   const switchMode = (next: TimerMode) => {
-    handlePause();
+    console.log(
+      '🔀 switchMode called - new mode:',
+      next,
+      'isRunning:',
+      isRunning
+    );
+
+    // Only pause if timer is running - let the user manually switch modes while paused
+    if (isRunning) {
+      console.log('⏸️ Timer is running, pausing before mode switch');
+      handlePause();
+    }
+
     dispatch(setMode(next));
     dispatch(setSecondsLeft(getDuration(next)));
+
     // Reset session saved flag when switching to focus mode
     if (next === 'focus') {
       sessionSavedRef.current = false;
@@ -343,6 +479,24 @@ export default function AppShell() {
 
   return (
     <div className="flex flex-col">
+      {/* Fix 2: Sound unlock overlay - shown when timer is running but sound is locked */}
+      {isRunning && soundEnabled && !soundUnlocked && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
+          <div className="rounded-xl border border-white/10 bg-black/80 p-6 max-w-sm">
+            <div className="text-sm mb-4 opacity-90">
+              Sound is blocked after refresh. Tap once to enable alerts and
+              soundscape.
+            </div>
+            <button
+              onClick={unlockSound}
+              className="w-full px-4 py-2 rounded bg-white/10 hover:bg-white/20 text-sm font-medium transition-colors"
+            >
+              Enable sound
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Stats bar */}
       <div className="absolute top-16 left-0 right-0 z-30 stats-bar">
         {/* Completed */}
@@ -390,6 +544,7 @@ export default function AppShell() {
           <SoundscapePlayer
             timerMode={mode}
             isRunning={isRunning}
+            soundUnlocked={soundUnlocked}
             onPlayingChange={setSoundscapePlaying}
             onOpenChange={setSoundscapeOpen}
           />
@@ -433,8 +588,6 @@ export default function AppShell() {
                   onBreakChange={(mins) => dispatch(setBreakDuration(mins))}
                   soundEnabled={timerSettings.soundEnabled}
                   onSoundToggle={() => dispatch(toggleSound())}
-                  autoStart={timerSettings.autoStart}
-                  onAutoStartToggle={() => dispatch(toggleAutoStart())}
                   hideSeconds={timerSettings.hideSeconds}
                   onHideSecondsToggle={() => dispatch(toggleHideSeconds())}
                   notifications={timerSettings.notifications}

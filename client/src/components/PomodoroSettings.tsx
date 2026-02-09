@@ -18,8 +18,6 @@ interface PomodoroSettingsProps {
   onBreakChange: (mins: number) => void;
   soundEnabled: boolean;
   onSoundToggle: () => void;
-  autoStart: boolean;
-  onAutoStartToggle: () => void;
   hideSeconds: boolean;
   onHideSecondsToggle: () => void;
   notifications: boolean;
@@ -41,8 +39,6 @@ export function PomodoroSettings({
   onBreakChange,
   soundEnabled,
   onSoundToggle,
-  autoStart,
-  onAutoStartToggle,
   hideSeconds,
   onHideSecondsToggle,
   notifications,
@@ -227,11 +223,6 @@ export function PomodoroSettings({
                   label: 'Timer sound effects',
                   enabled: soundEnabled,
                   onToggle: onSoundToggle,
-                },
-                {
-                  label: 'Auto-start timers',
-                  enabled: autoStart,
-                  onToggle: onAutoStartToggle,
                 },
                 {
                   label: 'Hide seconds',
