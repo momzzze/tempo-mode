@@ -37,7 +37,7 @@ import {
 } from '../utils/soundUtils';
 import { updateFavicon } from '../utils/dynamicFavicon';
 import { sessionApi } from '../api/client';
-import { Coffee, CheckCircle, Clock, Zap } from 'lucide-react';
+import { Coffee, CheckCircle, Clock, Trophy } from 'lucide-react';
 import './AppShell.css';
 
 export default function AppShell() {
@@ -521,7 +521,7 @@ export default function AppShell() {
         {auth.user && (
           <div className="stats-item">
             <div className="stats-item__icon">
-              <Zap size={24} className="text-yellow-400" />
+              <Trophy size={24} className="text-yellow-400" />
             </div>
             <div className="stats-item__label">{auth.user.points || 0}</div>
           </div>

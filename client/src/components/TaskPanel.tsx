@@ -3,7 +3,7 @@ import {
   ListTodo,
   Plus,
   Trophy,
-  Zap,
+  Coffee,
   Target,
   Check,
   Trash2,
@@ -184,10 +184,14 @@ export function TaskPanel({ onTaskComplete }: TaskPanelProps) {
               <span>Your Tasks</span>
             </div>
             {auth.user && (
-              <div className="task-panel__rewards">
+              <button
+                type="button"
+                className="task-panel__rewards task-panel__rewards-button"
+                onClick={() => console.log('Points button clicked')}
+              >
                 <Trophy size={16} />
-                <span>{totalRewardPoints} pts</span>
-              </div>
+                <span>{auth.user.points || 0} pts</span>
+              </button>
             )}
           </div>
 
@@ -195,7 +199,7 @@ export function TaskPanel({ onTaskComplete }: TaskPanelProps) {
           {activeTask && (
             <div className="task-panel__active-task">
               <div className="task-panel__active-indicator">
-                <Zap size={16} />
+                <Coffee size={16} />
                 <span>Focus Mode</span>
               </div>
               <div className="task-panel__active-title">{activeTask.title}</div>

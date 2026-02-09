@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Link } from '@tanstack/react-router';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -35,7 +34,7 @@ interface StatsData {
   }>;
 }
 
-export default function Statistics() {
+export default function Statistics({ onClose }: { onClose: () => void }) {
   const [todayMinutes, setTodayMinutes] = useState(0);
   const [weekMinutes, setWeekMinutes] = useState(0);
   const [monthMinutes, setMonthMinutes] = useState(0);
@@ -50,6 +49,17 @@ export default function Statistics() {
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
 
   useEffect(() => {
     const loadStats = async () => {
@@ -262,163 +272,175 @@ export default function Statistics() {
   );
 
   return (
-    <div className="min-h-screen w-5/6 mx-auto text-white">
-      {/* Layout: ads on sides with main content in center */}
-      <div className="flex">
-        {/* Left ad space */}
-        <div className="hidden lg:flex flex-shrink-0 w-[clamp(16px,4vw,72px)]" />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
 
-        {/* Main content - full width with padding */}
-        <div className="flex-1 px-[clamp(16px,4vw,72px)] py-8">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <Button
-              variant="ghost"
-              size="icon"
-              asChild
-              className="!text-white/80 hover:!text-white hover:!bg-white/10"
-            >
-              <Link to="/app">
-                <ArrowLeft size={20} />
-              </Link>
-            </Button>
-            <h1 className="text-3xl font-bold">Focus Statistics</h1>
-          </div>
+      {/* Modal Content */}
+      <div className="relative z-10 w-full h-full overflow-auto">
+        <div className="min-h-screen w-5/6 mx-auto text-white py-8">
+          {/* Layout: ads on sides with main content in center */}
+          <div className="flex">
+            {/* Left ad space */}
+            <div className="hidden lg:flex flex-shrink-0 w-[clamp(16px,4vw,72px)]" />
 
-          {/* Three Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card className="bg-white/5 border-white/10 p-6 text-center">
-              <h2 className="text-sm text-white/60 mb-2">Today</h2>
-              <p className="text-3xl font-bold text-white">
-                {isLoading ? '...' : formatTime(todayMinutes)}
-              </p>
-            </Card>
-
-            <Card className="bg-white/5 border-white/10 p-6 text-center">
-              <h2 className="text-sm text-white/60 mb-2">This Week</h2>
-              <p className="text-3xl font-bold text-white">
-                {isLoading ? '...' : formatTime(weekMinutes)}
-              </p>
-            </Card>
-
-            <Card className="bg-white/5 border-white/10 p-6 text-center">
-              <h2 className="text-sm text-white/60 mb-2">This Month</h2>
-              <p className="text-3xl font-bold text-white">
-                {isLoading ? '...' : formatTime(monthMinutes)}
-              </p>
-            </Card>
-          </div>
-
-          {/* Charts Tabs */}
-          <Card className="bg-white/5 border-white/10 p-6">
-            {isLoading ? (
-              <div className="text-center text-white/50 py-12">
-                Loading statistics...
+            {/* Main content - full width with padding */}
+            <div className="flex-1 px-[clamp(16px,4vw,72px)]">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-8">
+                <h1 className="text-3xl font-bold">Focus Statistics</h1>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  className="!text-white/80 hover:!text-white hover:!bg-white/10"
+                  title="Close Statistics"
+                >
+                  <X size={24} />
+                </Button>
               </div>
-            ) : (
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-3 bg-white/5 border border-white/10">
-                  <TabsTrigger
-                    value="day"
-                    className="data-[state=active]:bg-white/10"
-                  >
-                    Day
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="week"
-                    className="data-[state=active]:bg-white/10"
-                  >
-                    Week
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="month"
-                    className="data-[state=active]:bg-white/10"
-                  >
-                    Month
-                  </TabsTrigger>
-                </TabsList>
 
-                <TabsContent value="day" className="mt-6">
-                  <div className="text-sm text-white/60 mb-4">
-                    {new Date().toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
+              {/* Three Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <Card className="bg-white/5 border-white/10 p-6 text-center">
+                  <h2 className="text-sm text-white/60 mb-2">Today</h2>
+                  <p className="text-3xl font-bold text-white">
+                    {isLoading ? '...' : formatTime(todayMinutes)}
+                  </p>
+                </Card>
+
+                <Card className="bg-white/5 border-white/10 p-6 text-center">
+                  <h2 className="text-sm text-white/60 mb-2">This Week</h2>
+                  <p className="text-3xl font-bold text-white">
+                    {isLoading ? '...' : formatTime(weekMinutes)}
+                  </p>
+                </Card>
+
+                <Card className="bg-white/5 border-white/10 p-6 text-center">
+                  <h2 className="text-sm text-white/60 mb-2">This Month</h2>
+                  <p className="text-3xl font-bold text-white">
+                    {isLoading ? '...' : formatTime(monthMinutes)}
+                  </p>
+                </Card>
+              </div>
+
+              {/* Charts Tabs */}
+              <Card className="bg-white/5 border-white/10 p-6">
+                {isLoading ? (
+                  <div className="text-center text-white/50 py-12">
+                    Loading statistics...
                   </div>
-                  {dayChartData.length > 0 ? (
-                    <ChartBar data={dayChartData} />
-                  ) : (
-                    <div className="text-center text-white/50 py-12">
-                      Loading...
-                    </div>
-                  )}
-                </TabsContent>
+                ) : (
+                  <Tabs
+                    value={activeTab}
+                    onValueChange={setActiveTab}
+                    className="w-full"
+                  >
+                    <TabsList className="grid w-full grid-cols-3 bg-white/5 border border-white/10">
+                      <TabsTrigger
+                        value="day"
+                        className="data-[state=active]:bg-white/10"
+                      >
+                        Day
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="week"
+                        className="data-[state=active]:bg-white/10"
+                      >
+                        Week
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="month"
+                        className="data-[state=active]:bg-white/10"
+                      >
+                        Month
+                      </TabsTrigger>
+                    </TabsList>
 
-                <TabsContent value="week" className="mt-6">
-                  <div className="text-sm text-white/60 mb-4">Last 7 days</div>
-                  {weekChartData.length > 0 ? (
-                    <ChartBar data={weekChartData} />
-                  ) : (
-                    <div className="text-center text-white/50 py-12">
-                      Loading...
-                    </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="month" className="mt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={goToPreviousMonth}
-                      className="!text-white/60 hover:!text-white hover:!bg-white/10"
-                    >
-                      <ChevronLeft size={20} />
-                    </Button>
-                    <div className="text-sm text-white/60">
-                      {new Date(selectedYear, selectedMonth).toLocaleDateString(
-                        'en-US',
-                        {
+                    <TabsContent value="day" className="mt-6">
+                      <div className="text-sm text-white/60 mb-4">
+                        {new Date().toLocaleDateString('en-US', {
+                          weekday: 'long',
                           month: 'long',
-                          year: 'numeric',
-                        }
+                          day: 'numeric',
+                        })}
+                      </div>
+                      {dayChartData.length > 0 ? (
+                        <ChartBar data={dayChartData} />
+                      ) : (
+                        <div className="text-center text-white/50 py-12">
+                          Loading...
+                        </div>
                       )}
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={goToNextMonth}
-                      disabled={
-                        selectedMonth === new Date().getMonth() &&
-                        selectedYear === new Date().getFullYear()
-                      }
-                      className="!text-white/60 hover:!text-white hover:!bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <ChevronRight size={20} />
-                    </Button>
-                  </div>
-                  {monthChartData.length > 0 ? (
-                    <ChartBar data={monthChartData} />
-                  ) : (
-                    <div className="text-center text-white/50 py-12">
-                      Loading...
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            )}
-          </Card>
-        </div>
+                    </TabsContent>
 
-        {/* Right ad space */}
-        <div className="hidden lg:flex flex-shrink-0 w-[clamp(16px,4vw,72px)]" />
+                    <TabsContent value="week" className="mt-6">
+                      <div className="text-sm text-white/60 mb-4">
+                        Last 7 days
+                      </div>
+                      {weekChartData.length > 0 ? (
+                        <ChartBar data={weekChartData} />
+                      ) : (
+                        <div className="text-center text-white/50 py-12">
+                          Loading...
+                        </div>
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="month" className="mt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={goToPreviousMonth}
+                          className="!text-white/60 hover:!text-white hover:!bg-white/10"
+                        >
+                          <ChevronLeft size={20} />
+                        </Button>
+                        <div className="text-sm text-white/60">
+                          {new Date(
+                            selectedYear,
+                            selectedMonth
+                          ).toLocaleDateString('en-US', {
+                            month: 'long',
+                            year: 'numeric',
+                          })}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={goToNextMonth}
+                          disabled={
+                            selectedMonth === new Date().getMonth() &&
+                            selectedYear === new Date().getFullYear()
+                          }
+                          className="!text-white/60 hover:!text-white hover:!bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <ChevronRight size={20} />
+                        </Button>
+                      </div>
+                      {monthChartData.length > 0 ? (
+                        <ChartBar data={monthChartData} />
+                      ) : (
+                        <div className="text-center text-white/50 py-12">
+                          Loading...
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                )}
+              </Card>
+            </div>
+
+            {/* Right ad space */}
+            <div className="hidden lg:flex flex-shrink-0 w-[clamp(16px,4vw,72px)]" />
+          </div>
+        </div>
       </div>
     </div>
   );

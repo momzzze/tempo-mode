@@ -1,10 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
-import { LogOut, Settings, LogIn, UserPlus, User2Icon } from 'lucide-react';
+import { LogOut, Settings, LogIn, UserPlus, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from '@tanstack/react-router';
 import { useAppDispatch, useAppSelector, logout } from '@/store';
 
-export function ProfileSection({ isAuthed }: { isAuthed: boolean }) {
+export function ProfileSection({
+  isAuthed,
+  onOpenStats,
+}: {
+  isAuthed: boolean;
+  onOpenStats?: () => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -61,12 +67,12 @@ export function ProfileSection({ isAuthed }: { isAuthed: boolean }) {
             <>
               <button
                 onClick={() => {
-                  router.navigate({ to: '/statistics' });
+                  onOpenStats?.();
                   setIsOpen(false);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
               >
-                <User2Icon size={16} />
+                <BarChart3 size={16} />
                 Statistics
               </button>
 

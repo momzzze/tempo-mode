@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Outlet, Link } from '@tanstack/react-router';
-import { Home, LayoutDashboard } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { fetchRandomWorldImage } from './services/pexelsService';
 import { useAppSelector, selectIsAuthed } from './store';
 import { ProfileSection } from './components/ProfileSection';
+import Statistics from './pages/Statistics';
 
 export default function App() {
   // const router = useRouter();
@@ -12,6 +13,9 @@ export default function App() {
 
   // Background image state
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(null);
+
+  // Statistics modal state
+  const [statsModalOpen, setStatsModalOpen] = useState(false);
 
   // Load background image on mount
   useEffect(() => {
@@ -60,18 +64,10 @@ export default function App() {
                     <Home size={20} />
                   </Link>
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  asChild
-                  title="App"
-                  className="!text-white/80 hover:!text-white hover:!bg-white/10"
-                >
-                  <Link to="/app">
-                    <LayoutDashboard size={20} />
-                  </Link>
-                </Button>
-                <ProfileSection isAuthed={isAuthed} />
+                <ProfileSection
+                  isAuthed={isAuthed}
+                  onOpenStats={() => setStatsModalOpen(true)}
+                />
               </div>
             </div>
           </div>
@@ -80,6 +76,11 @@ export default function App() {
           <Outlet />
         </div>
       </div>
+
+      {/* Statistics Modal Overlay */}
+      {statsModalOpen && (
+        <Statistics onClose={() => setStatsModalOpen(false)} />
+      )}
     </div>
   );
 }
