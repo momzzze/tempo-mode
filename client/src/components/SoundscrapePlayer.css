@@ -7,3 +7,12 @@
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
+/* Hide scrollbar while keeping scroll functionality */
+.hidden-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}

@@ -49,6 +49,84 @@ export const THUNDERSTORM_URLS = {
 };
 
 /**
+ * YouTube ambient music categories with multiple streams/radios
+ * Each category can have multiple video streams
+ * Format: YouTube video ID (11 characters after watch?v=)
+ * Example: https://www.youtube.com/watch?v=jfKfPfyJRdk -> 'jfKfPfyJRdk'
+ */
+export const YOUTUBE_CATEGORIES = {
+  LOFI: {
+    name: 'Lo-fi Hip Hop',
+    icon: 'Music2',
+    streams: [
+      {
+        name: 'Lofi Girl - beats to relax/study to',
+        id: 'jfKfPfyJRdk',
+        icon: 'Radio',
+      },
+      {
+        name: 'Chillhop Radio - jazzy & lofi hip hop beats',
+        id: '5yx6BWlEVcY',
+        icon: 'Radio',
+      },
+      {
+        name: 'lofi hip hop radio - beats to sleep/chill to',
+        id: 'rUxyKA_-grg',
+        icon: 'Radio',
+      },
+    ],
+  },
+  STUDY: {
+    name: 'Study Music',
+    icon: 'BookOpen',
+    streams: [
+      {
+        name: 'Deep Focus - Calm Study Music',
+        id: '5qap5aO4i9A',
+        icon: 'Radio',
+      },
+      {
+        name: 'Peaceful Piano - Relaxing Music',
+        id: 'lTRiuFIWV54',
+        icon: 'Radio',
+      },
+    ],
+  },
+  JAZZ: {
+    name: 'Jazz & Coffee',
+    icon: 'Coffee',
+    streams: [
+      {
+        name: 'Smooth Jazz Radio',
+        id: 'Dx5qFachd3A',
+        icon: 'Radio',
+      },
+      {
+        name: 'Jazz Café Music',
+        id: 'fEvM-OUbaKs',
+        icon: 'Radio',
+      },
+    ],
+  },
+  AMBIENT: {
+    name: 'Ambient & Chill',
+    icon: 'Headphones',
+    streams: [
+      {
+        name: 'Chill Vibes',
+        id: '7NOSDKb0HlU',
+        icon: 'Radio',
+      },
+      {
+        name: 'Ambient Music for Studying',
+        id: 'ztxC4vvFrKo',
+        icon: 'Radio',
+      },
+    ],
+  },
+};
+
+/**
  * Icon requirements for soundscape elements:
  *
  * Already available (lucide-react):

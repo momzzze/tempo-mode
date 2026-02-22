@@ -3,6 +3,8 @@ import { Music } from 'lucide-react';
 import { SoundscapeTabs } from './sounds/SoundscapeTabs';
 import { SoundscapeGrid } from './sounds/SoundscapeGrid';
 import { SoundscapeDetail } from './sounds/SoundscapeDetail';
+import { YouTubeDetail } from './sounds/YouTubeDetail';
+import { YouTubePlayer } from './sounds/YouTubePlayer';
 import './SoundscrapePlayer.css';
 import {
   RAINFALL_URLS,
@@ -10,6 +12,7 @@ import {
   GARDEN_URLS,
   RIVER_URLS,
   THUNDERSTORM_URLS,
+  YOUTUBE_CATEGORIES,
 } from '../utils/soundscapeConstants';
 
 const tagElements = [
@@ -77,7 +80,15 @@ const tagElements = [
       },
     ],
   },
-  { name: 'Youtube' },
+  {
+    name: 'Youtube',
+    elements: Object.values(YOUTUBE_CATEGORIES).map((category) => ({
+      name: category.name,
+      icon: category.icon,
+      streams: category.streams,
+      isYouTube: true, // Flag to identify YouTube elements
+    })),
+  },
   { name: 'Spotify' },
 ];
 
@@ -107,19 +118,43 @@ export function SoundscapePlayer({
     Record<string, number[]>
   >({});
 
+  // YouTube state - track current video and whether it should be playing
+  const [currentYouTubeId, setCurrentYouTubeId] = useState<string | null>(null);
+  const [isYouTubePlaying, setIsYouTubePlaying] = useState(false);
+
+  // Use refs to track previous values and avoid unnecessary updates
+  const prevPlayingElementRef = useRef<any>(null);
+  const currentYouTubeIdRef = useRef<string | null>(null);
+  const isPlayingRef = useRef(false);
+
   // Store audio element refs for each soundscape track
   const audioRefs = useRef<Map<string, HTMLAudioElement[]>>(new Map());
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
 
+  // Initialize default volumes (0.5 for each track) for all soundscapes
+  const initializeDefaultVolumes = () => {
+    const defaultVolumes: Record<string, number[]> = {};
+    const soundscapeElements = tagElements[0].elements;
+    if (soundscapeElements) {
+      soundscapeElements.forEach((element: any) => {
+        if (element.audioFiles) {
+          const trackCount = element.audioFiles.length || 0;
+          defaultVolumes[element.name] = Array(trackCount).fill(0.5);
+        }
+      });
+    }
+    setSoundscapeVolumes(defaultVolumes);
+  };
+
   // Load last played soundscape and volumes from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('lastPlayedSoundscape');
     if (saved) {
       const element = tagElements
-        .flatMap((tab) => tab.elements || [])
-        .find((el) => el.name === saved);
+        .flatMap((tab: any) => tab.elements || [])
+        .find((el: any) => el.name === saved);
       if (element) {
         console.log('📝 Loaded last soundscape:', saved);
         setSelectedElement(element);
@@ -140,16 +175,6 @@ export function SoundscapePlayer({
     }
   }, []);
 
-  // Initialize default volumes (0.5 for each track) for all soundscapes
-  const initializeDefaultVolumes = () => {
-    const defaultVolumes: Record<string, number[]> = {};
-    tagElements[0].elements?.forEach((element) => {
-      const trackCount = element.audioFiles?.length || 0;
-      defaultVolumes[element.name] = Array(trackCount).fill(0.5);
-    });
-    setSoundscapeVolumes(defaultVolumes);
-  };
-
   // Auto-play soundscape when focus timer starts, stop on pause or break
   useEffect(() => {
     console.log(
@@ -162,12 +187,18 @@ export function SoundscapePlayer({
     // Stop music when paused or in break mode
     if (!isRunning || timerMode === 'break') {
       console.log('⏹️ Stopping audio - paused or break mode');
-      setPlayingElement(null);
+      if (isPlayingRef.current) {
+        setPlayingElement(null);
+        isPlayingRef.current = false;
+      }
       return;
     }
 
     // Auto-play when in focus mode and running
-    if (timerMode === 'focus' && isRunning) {
+    // Only set if not already playing (avoid re-setting on every timer tick)
+    if (timerMode === 'focus' && isRunning && !isPlayingRef.current) {
+      console.log('▶️ Auto-starting soundscape on timer start');
+
       // Get last played soundscape, or default to Rainfall
       let saved = localStorage.getItem('lastPlayedSoundscape');
       console.log('💾 Saved soundscape from localStorage:', saved);
@@ -179,13 +210,14 @@ export function SoundscapePlayer({
       }
 
       const element = tagElements
-        .flatMap((tab) => tab.elements || [])
-        .find((el) => el.name === saved);
+        .flatMap((tab: any) => tab.elements || [])
+        .find((el: any) => el.name === saved);
 
       console.log('🎵 Found element:', element?.name);
 
       if (element) {
         console.log('▶️ Setting playingElement to:', element.name);
+        isPlayingRef.current = true;
         setPlayingElement(element);
       }
     }
@@ -198,9 +230,18 @@ export function SoundscapePlayer({
 
     if (playingElement?.name === element.name) {
       setPlayingElement(null);
+      isPlayingRef.current = false;
     } else {
       setPlayingElement(element);
+      isPlayingRef.current = true;
     }
+  };
+
+  // Handle YouTube stream selection change
+  const handleYouTubeStreamChange = (streamId: string) => {
+    console.log('🎬 YouTube stream changed to:', streamId);
+    currentYouTubeIdRef.current = streamId;
+    setCurrentYouTubeId(streamId);
   };
 
   const handleVolumeChange = (index: number, value: number) => {
@@ -239,11 +280,57 @@ export function SoundscapePlayer({
     );
 
     if (!playingElement) {
-      // Stop all audio
+      // Reset tracking refs
+      prevPlayingElementRef.current = null;
+      isPlayingRef.current = false;
+      // Stop all audio soundscapes
       audioRefs.current.forEach((audioElements) => {
         audioElements.forEach((audio) => audio.pause());
       });
+      // Stop YouTube
+      setIsYouTubePlaying(false);
+      setCurrentYouTubeId(null);
+      currentYouTubeIdRef.current = null;
       onPlayingChange?.(false);
+      return;
+    }
+
+    // Check if it's a YouTube element
+    if (playingElement.isYouTube && playingElement.streams) {
+      // Only update if playingElement changed (not just a re-render)
+      if (prevPlayingElementRef.current !== playingElement) {
+        console.log('🎬 Playing YouTube element:', playingElement.name);
+        console.log('🎬 Streams available:', playingElement.streams.length);
+
+        prevPlayingElementRef.current = playingElement;
+
+        // Stop any soundscape audio
+        audioRefs.current.forEach((audioElements) => {
+          audioElements.forEach((audio) => audio.pause());
+        });
+
+        // Play first stream by default (or previously selected stream)
+        const firstStream = playingElement.streams[0];
+        if (firstStream) {
+          console.log('🎬 Setting video ID to:', firstStream.id);
+          console.log('🎬 Setting isYouTubePlaying to: true');
+
+          // Only update state if value actually changed
+          if (currentYouTubeIdRef.current !== firstStream.id) {
+            currentYouTubeIdRef.current = firstStream.id;
+            setCurrentYouTubeId(firstStream.id);
+          }
+          setIsYouTubePlaying(true);
+          onPlayingChange?.(true);
+        } else {
+          console.error('❌ No streams found in YouTube element');
+        }
+      } else if (soundUnlocked && !isYouTubePlaying) {
+        // If YouTube element didn't change but sound just unlocked, resume playback
+        console.log('🔊 Sound unlocked, resuming YouTube playback');
+        setIsYouTubePlaying(true);
+        onPlayingChange?.(true);
+      }
       return;
     }
 
@@ -252,6 +339,10 @@ export function SoundscapePlayer({
       console.log('🔇 Playback blocked - waiting for sound unlock');
       return;
     }
+
+    // Stop YouTube if switching to soundscape
+    setIsYouTubePlaying(false);
+    setCurrentYouTubeId(null);
 
     // Get or create audio elements for this soundscape
     let audioElements = audioRefs.current.get(playingElement.name);
@@ -311,7 +402,8 @@ export function SoundscapePlayer({
         audioElements.forEach((audio) => audio.pause());
       }
     };
-  }, [playingElement, soundUnlocked, onPlayingChange, soundscapeVolumes]);
+  }, [playingElement, soundUnlocked, onPlayingChange]);
+  // Note: soundscapeVolumes removed from dependencies - volume changes are handled by handleVolumeChange
 
   useLayoutEffect(() => {
     if (!isOpen) return;
@@ -380,19 +472,31 @@ export function SoundscapePlayer({
                 <Music size={24} />
               </div>
               {selectedElement ? (
-                <SoundscapeDetail
-                  element={selectedElement}
-                  onBack={() => setSelectedElement(null)}
-                  volumes={
-                    soundscapeVolumes[selectedElement.name] ||
-                    Array(selectedElement.audioFiles?.length || 0).fill(0.5)
-                  }
-                  onVolumeChange={handleVolumeChange}
-                />
+                // Check if it's a YouTube element or regular soundscape
+                selectedElement.isYouTube ? (
+                  <YouTubeDetail
+                    element={selectedElement}
+                    onBack={() => setSelectedElement(null)}
+                    isPlaying={isYouTubePlaying}
+                    soundUnlocked={soundUnlocked}
+                    onStreamChange={handleYouTubeStreamChange}
+                    currentStreamId={currentYouTubeId || undefined}
+                  />
+                ) : (
+                  <SoundscapeDetail
+                    element={selectedElement}
+                    onBack={() => setSelectedElement(null)}
+                    volumes={
+                      soundscapeVolumes[selectedElement.name] ||
+                      Array(selectedElement.audioFiles?.length || 0).fill(0.5)
+                    }
+                    onVolumeChange={handleVolumeChange}
+                  />
+                )
               ) : (
                 <>
                   <SoundscapeTabs
-                    tabs={tagElements}
+                    tabs={tagElements as any}
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
                   />
@@ -412,6 +516,32 @@ export function SoundscapePlayer({
             </div>
           </div>
         </>
+      )}
+
+      {/* Hidden YouTube Player - always present for background playback */}
+      {currentYouTubeId && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '0',
+            right: '0',
+            width: '1px',
+            height: '1px',
+            opacity: 0,
+            pointerEvents: 'none',
+            zIndex: -1,
+          }}
+        >
+          <YouTubePlayer
+            videoId={currentYouTubeId}
+            isPlaying={isYouTubePlaying}
+            soundUnlocked={soundUnlocked}
+            onReady={() => console.log('Background YouTube player ready')}
+            onError={(error) =>
+              console.error('Background YouTube error:', error)
+            }
+          />
+        </div>
       )}
     </div>
   );
