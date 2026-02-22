@@ -4,11 +4,13 @@ import { SoundscapeTabs } from './sounds/SoundscapeTabs';
 import { SoundscapeGrid } from './sounds/SoundscapeGrid';
 import { SoundscapeDetail } from './sounds/SoundscapeDetail';
 import './SoundscrapePlayer.css';
-
-const RAINFALL_URL =
-  'https://pub-f15639bb028e401aadde6f4e84b409ea.r2.dev/soundscapes/rainfall/ambiance-heavy-rain-loop.ogg';
-const RAINFALL_UMBRELLA_URL =
-  'https://pub-f15639bb028e401aadde6f4e84b409ea.r2.dev/soundscapes/rainfall/rain-medium-umbrella.ogg';
+import {
+  RAINFALL_URLS,
+  FOREST_URLS,
+  GARDEN_URLS,
+  RIVER_URLS,
+  THUNDERSTORM_URLS,
+} from '../utils/soundscapeConstants';
 
 const tagElements = [
   {
@@ -16,13 +18,63 @@ const tagElements = [
     elements: [
       {
         name: 'Rainfall',
-        audioFiles: [RAINFALL_URL, RAINFALL_UMBRELLA_URL],
+        audioFiles: [RAINFALL_URLS.AMBIANCE, RAINFALL_URLS.UMBRELLA],
         icon: 'CloudRain',
+        tracks: [
+          { name: 'Ambiance', url: RAINFALL_URLS.AMBIANCE, icon: 'CloudRain' },
+          { name: 'Umbrella', url: RAINFALL_URLS.UMBRELLA, icon: 'Umbrella' },
+        ],
       },
-      { name: 'Thunderstorm', audioFiles: [], icon: 'Cloud' },
-      { name: 'Garden', audioFiles: [], icon: 'Leaf' },
-      { name: 'River', audioFiles: [], icon: 'Waves' },
-      { name: 'Forest', audioFiles: [], icon: 'Trees' },
+      {
+        name: 'Thunderstorm',
+        audioFiles: [
+          THUNDERSTORM_URLS.RAIN,
+          THUNDERSTORM_URLS.THUNDER,
+          THUNDERSTORM_URLS.WIND,
+        ],
+        icon: 'Cloud',
+        tracks: [
+          { name: 'Rain', url: THUNDERSTORM_URLS.RAIN, icon: 'CloudRain' },
+          { name: 'Thunder', url: THUNDERSTORM_URLS.THUNDER, icon: 'Zap' },
+          { name: 'Wind', url: THUNDERSTORM_URLS.WIND, icon: 'Wind' },
+        ],
+      },
+      {
+        name: 'Garden',
+        audioFiles: [GARDEN_URLS.CHIMES, GARDEN_URLS.INSECTS, GARDEN_URLS.WIND],
+        icon: 'Leaf',
+        tracks: [
+          { name: 'Chimes', url: GARDEN_URLS.CHIMES, icon: 'Bell' },
+          { name: 'Insects', url: GARDEN_URLS.INSECTS, icon: 'Bug' },
+          { name: 'Wind', url: GARDEN_URLS.WIND, icon: 'Wind' },
+        ],
+      },
+      {
+        name: 'River',
+        audioFiles: [
+          RIVER_URLS.BIRDS,
+          RIVER_URLS.BUBBLES,
+          RIVER_URLS.RIVER,
+          RIVER_URLS.WIND,
+        ],
+        icon: 'Waves',
+        tracks: [
+          { name: 'Birds', url: RIVER_URLS.BIRDS, icon: 'Bird' },
+          { name: 'Bubbles', url: RIVER_URLS.BUBBLES, icon: 'Droplet' },
+          { name: 'River', url: RIVER_URLS.RIVER, icon: 'Waves' },
+          { name: 'Wind', url: RIVER_URLS.WIND, icon: 'Wind' },
+        ],
+      },
+      {
+        name: 'Forest',
+        audioFiles: [FOREST_URLS.BIRDS, FOREST_URLS.INSECTS, FOREST_URLS.WIND],
+        icon: 'Trees',
+        tracks: [
+          { name: 'Birds', url: FOREST_URLS.BIRDS, icon: 'Bird' },
+          { name: 'Insects', url: FOREST_URLS.INSECTS, icon: 'Bug' },
+          { name: 'Wind', url: FOREST_URLS.WIND, icon: 'Wind' },
+        ],
+      },
     ],
   },
   { name: 'Youtube' },
@@ -49,11 +101,15 @@ export function SoundscapePlayer({
   const [selectedElement, setSelectedElement] = useState<any | null>(null);
   const [playingElement, setPlayingElement] = useState<any | null>(null);
   const [alignRight, setAlignRight] = useState(false);
-  const [rainfallVolumes, setRainfallVolumes] = useState([0.5, 0.5]);
 
-  // Direct ref for audio
-  const rainfallAudio = useRef<HTMLAudioElement>(null);
-  const rainfallUmbrellaAudio = useRef<HTMLAudioElement>(null);
+  // Store volumes for all soundscapes: { Rainfall: [0.5, 0.5], Thunderstorm: [0.5, 0.5, 0.5], ... }
+  const [soundscapeVolumes, setSoundscapeVolumes] = useState<
+    Record<string, number[]>
+  >({});
+
+  // Store audio element refs for each soundscape track
+  const audioRefs = useRef<Map<string, HTMLAudioElement[]>>(new Map());
+
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const modalRef = useRef<HTMLDivElement | null>(null);
 
@@ -70,17 +126,29 @@ export function SoundscapePlayer({
       }
     }
 
-    // Load volumes from localStorage
-    const savedVolumes = localStorage.getItem('rainfallVolumes');
+    // Load or initialize volumes for all soundscapes
+    const savedVolumes = localStorage.getItem('soundscapeVolumes');
     if (savedVolumes) {
       try {
-        const volumes = JSON.parse(savedVolumes);
-        setRainfallVolumes(volumes);
+        setSoundscapeVolumes(JSON.parse(savedVolumes));
       } catch (e) {
         console.error('Failed to load volumes:', e);
+        initializeDefaultVolumes();
       }
+    } else {
+      initializeDefaultVolumes();
     }
   }, []);
+
+  // Initialize default volumes (0.5 for each track) for all soundscapes
+  const initializeDefaultVolumes = () => {
+    const defaultVolumes: Record<string, number[]> = {};
+    tagElements[0].elements?.forEach((element) => {
+      const trackCount = element.audioFiles?.length || 0;
+      defaultVolumes[element.name] = Array(trackCount).fill(0.5);
+    });
+    setSoundscapeVolumes(defaultVolumes);
+  };
 
   // Auto-play soundscape when focus timer starts, stop on pause or break
   useEffect(() => {
@@ -136,33 +204,32 @@ export function SoundscapePlayer({
   };
 
   const handleVolumeChange = (index: number, value: number) => {
-    console.log('🔊 Volume changed:', index, value);
-    const newVolumes = [...rainfallVolumes];
-    newVolumes[index] = value;
-    setRainfallVolumes(newVolumes);
+    if (!selectedElement) return;
+
+    console.log('🔊 Volume changed:', selectedElement.name, index, value);
+
+    // Update volumes for the selected soundscape
+    const currentVolumes = soundscapeVolumes[selectedElement.name] || [];
+    const updatedVolumes = [...currentVolumes];
+    updatedVolumes[index] = value;
+
+    const newVolumes = {
+      ...soundscapeVolumes,
+      [selectedElement.name]: updatedVolumes,
+    };
+    setSoundscapeVolumes(newVolumes);
 
     // Save to localStorage
-    localStorage.setItem('rainfallVolumes', JSON.stringify(newVolumes));
+    localStorage.setItem('soundscapeVolumes', JSON.stringify(newVolumes));
 
     // Apply volume to audio element
-    if (index === 0 && rainfallAudio.current) {
-      rainfallAudio.current.volume = value;
-    } else if (index === 1 && rainfallUmbrellaAudio.current) {
-      rainfallUmbrellaAudio.current.volume = value;
+    const audioElements = audioRefs.current.get(selectedElement.name);
+    if (audioElements && audioElements[index]) {
+      audioElements[index].volume = value;
     }
   };
 
-  // Apply volumes to audio elements whenever they change
-  useEffect(() => {
-    if (rainfallAudio.current) {
-      rainfallAudio.current.volume = rainfallVolumes[0];
-    }
-    if (rainfallUmbrellaAudio.current) {
-      rainfallUmbrellaAudio.current.volume = rainfallVolumes[1];
-    }
-  }, [rainfallVolumes]);
-
-  // Simple play/pause effect
+  // Dynamic audio playback effect for any soundscape
   useEffect(() => {
     console.log(
       '🎵 playingElement:',
@@ -170,43 +237,81 @@ export function SoundscapePlayer({
       'soundUnlocked:',
       soundUnlocked
     );
-    if (!rainfallAudio.current) {
-      console.log('❌ Audio element not found');
+
+    if (!playingElement) {
+      // Stop all audio
+      audioRefs.current.forEach((audioElements) => {
+        audioElements.forEach((audio) => audio.pause());
+      });
+      onPlayingChange?.(false);
       return;
     }
 
-    console.log('📍 Audio src:', rainfallAudio.current.src);
-    console.log('📍 Audio readyState:', rainfallAudio.current.readyState);
-
-    if (playingElement?.name === 'Rainfall') {
-      // Check if sound is unlocked (browser autoplay policy)
-      if (!soundUnlocked) {
-        console.log('🔇 Rainfall playback blocked - waiting for sound unlock');
-        return;
-      }
-
-      console.log('▶️ Playing rainfall');
-      if (rainfallAudio.current) rainfallAudio.current.currentTime = 0;
-      if (rainfallUmbrellaAudio.current)
-        rainfallUmbrellaAudio.current.currentTime = 0;
-      rainfallAudio.current
-        ?.play()
-        .then(() => {
-          console.log('✅ Ambiance playing');
-          onPlayingChange?.(true);
-        })
-        .catch((err) => console.error('❌ Error:', err));
-      rainfallUmbrellaAudio.current
-        ?.play()
-        .then(() => console.log('✅ Umbrella playing'))
-        .catch((err) => console.error('❌ Error:', err));
-    } else {
-      console.log('⏸️ Pausing');
-      rainfallAudio.current?.pause();
-      rainfallUmbrellaAudio.current?.pause();
-      onPlayingChange?.(false);
+    // Check if sound is unlocked (browser autoplay policy)
+    if (!soundUnlocked) {
+      console.log('🔇 Playback blocked - waiting for sound unlock');
+      return;
     }
-  }, [playingElement, soundUnlocked, onPlayingChange]);
+
+    // Get or create audio elements for this soundscape
+    let audioElements = audioRefs.current.get(playingElement.name);
+    if (!audioElements && playingElement.audioFiles) {
+      console.log('🎵 Creating audio elements for:', playingElement.name);
+      audioElements = playingElement.audioFiles.map(
+        (url: string, idx: number) => {
+          const audio = new Audio(url);
+          audio.loop = true;
+          audio.preload = 'auto';
+
+          // Set volume from state
+          const volumes = soundscapeVolumes[playingElement.name] || [];
+          audio.volume = volumes[idx] !== undefined ? volumes[idx] : 0.5;
+
+          audio.addEventListener('canplay', () =>
+            console.log(`✅ ${playingElement.name} track ${idx + 1} can play`)
+          );
+          audio.addEventListener('error', (e) =>
+            console.error(
+              `❌ ${playingElement.name} track ${idx + 1} error:`,
+              e
+            )
+          );
+
+          return audio;
+        }
+      );
+      if (audioElements) {
+        audioRefs.current.set(playingElement.name, audioElements);
+      }
+    }
+
+    // Play all tracks for this soundscape
+    if (audioElements) {
+      console.log('▶️ Playing:', playingElement.name);
+      audioElements.forEach((audio, idx) => {
+        audio.currentTime = 0;
+        audio
+          .play()
+          .then(() =>
+            console.log(`✅ ${playingElement.name} track ${idx + 1} playing`)
+          )
+          .catch((err) =>
+            console.error(
+              `❌ ${playingElement.name} track ${idx + 1} error:`,
+              err
+            )
+          );
+      });
+      onPlayingChange?.(true);
+    }
+
+    // Cleanup: pause audio when component unmounts or playing element changes
+    return () => {
+      if (audioElements) {
+        audioElements.forEach((audio) => audio.pause());
+      }
+    };
+  }, [playingElement, soundUnlocked, onPlayingChange, soundscapeVolumes]);
 
   useLayoutEffect(() => {
     if (!isOpen) return;
@@ -250,36 +355,6 @@ export function SoundscapePlayer({
         <Music size={24} />
       </button>
 
-      {/* Single rainfall audio element */}
-      <audio
-        ref={rainfallAudio}
-        src={RAINFALL_URL}
-        loop
-        preload="auto"
-        onCanPlay={() => console.log('✅ Ambiance can play')}
-        onLoadStart={() => console.log('📥 Loading ambiance')}
-        onError={(e) =>
-          console.error(
-            '❌ Ambiance error:',
-            (e.target as HTMLAudioElement).error
-          )
-        }
-      />
-      <audio
-        ref={rainfallUmbrellaAudio}
-        src={RAINFALL_UMBRELLA_URL}
-        loop
-        preload="auto"
-        onCanPlay={() => console.log('✅ Umbrella can play')}
-        onLoadStart={() => console.log('📥 Loading umbrella')}
-        onError={(e) =>
-          console.error(
-            '❌ Umbrella error:',
-            (e.target as HTMLAudioElement).error
-          )
-        }
-      />
-
       {isOpen && (
         <>
           {/* Backdrop to capture clicks and close settings menu */}
@@ -309,7 +384,8 @@ export function SoundscapePlayer({
                   element={selectedElement}
                   onBack={() => setSelectedElement(null)}
                   volumes={
-                    selectedElement.name === 'Rainfall' ? rainfallVolumes : []
+                    soundscapeVolumes[selectedElement.name] ||
+                    Array(selectedElement.audioFiles?.length || 0).fill(0.5)
                   }
                   onVolumeChange={handleVolumeChange}
                 />

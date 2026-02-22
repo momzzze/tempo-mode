@@ -1,10 +1,17 @@
 import { ArrowLeft } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 
+interface Track {
+  name: string;
+  url: string;
+  icon: string;
+}
+
 interface SoundscapeElement {
   name: string;
   audioFiles?: string[];
   icon?: string;
+  tracks?: Track[];
 }
 
 interface SoundscapeDetailProps {
@@ -14,10 +21,10 @@ interface SoundscapeDetailProps {
   onVolumeChange: (index: number, value: number) => void;
 }
 
-const getIconComponent = (iconName?: string) => {
+const getIconComponent = (iconName?: string, size: number = 28) => {
   if (!iconName) return null;
   const Icon = (LucideIcons as any)[iconName];
-  return Icon ? <Icon size={28} strokeWidth={1.5} /> : null;
+  return Icon ? <Icon size={size} strokeWidth={1.5} /> : null;
 };
 
 export function SoundscapeDetail({
@@ -52,28 +59,39 @@ export function SoundscapeDetail({
           {element.audioFiles && element.audioFiles.length > 0 ? (
             <div className="soundscape-detail__tracks">
               {element.audioFiles.map((_, idx) => {
-                const trackNames = ['Ambiance', 'Medium Rain'];
+                // Get track info from tracks array if available
+                const track = element.tracks?.[idx];
+                const trackName = track?.name || `Track ${idx + 1}`;
+                const trackIcon = track?.icon;
+
                 return (
                   <div key={idx} className="soundscape-detail__track">
                     <div className="soundscape-detail__track-header">
-                      <label className="soundscape-detail__track-label">
-                        {trackNames[idx] || `Track ${idx + 1}`}
-                      </label>
+                      <div className="flex items-center gap-2">
+                        {trackIcon && (
+                          <div className="opacity-70">
+                            {getIconComponent(trackIcon, 18)}
+                          </div>
+                        )}
+                        <label className="soundscape-detail__track-label">
+                          {trackName}
+                        </label>
+                      </div>
                       <span className="soundscape-detail__track-percent">
-                        {Math.round(volumes[idx] * 100)}%
+                        {Math.round((volumes[idx] || 0) * 100)}%
                       </span>
                     </div>
                     <div className="soundscape-detail__slider-container">
                       <div
                         className="soundscape-detail__slider-fill"
-                        style={{ width: `${volumes[idx] * 100}%` }}
+                        style={{ width: `${(volumes[idx] || 0) * 100}%` }}
                       />
                       <input
                         type="range"
                         min="0"
                         max="1"
                         step="0.01"
-                        value={volumes[idx]}
+                        value={volumes[idx] || 0}
                         onChange={(e) =>
                           onVolumeChange(idx, parseFloat(e.target.value))
                         }
